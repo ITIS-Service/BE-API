@@ -35,6 +35,9 @@ public class User {
     @Column(name = "user_last_name")
     private String lastName;
 
+    @Column(name = "user_passed_quiz")
+    private boolean isPassedQuiz;
+
     @Column(name = "user_role")
     private UserRole role;
 
