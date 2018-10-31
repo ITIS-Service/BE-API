@@ -1,10 +1,9 @@
 package com.itis.service.repository;
 
 import com.itis.service.entity.Teacher;
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-@Repository
-public interface TeacherRepository extends CrudRepository<Teacher, Long> {
+@Transactional
+public interface TeacherRepository extends UserRepositoryBase<Teacher> {
 
 }

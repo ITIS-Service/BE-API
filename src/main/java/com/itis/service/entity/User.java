@@ -53,6 +53,14 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "point_id"))
     private List<Point> points = new ArrayList<>();
 
+    public User(String email, String password, String firstName, String lastName, UserRole role) {
+        this.email = email;
+        this.password = password;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.role = role;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
