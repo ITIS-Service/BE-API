@@ -13,6 +13,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -28,11 +29,13 @@ public class UserServiceImpl implements UserService {
 
     private final GroupRepository groupRepository;
     private final StudentRepository studentRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserServiceImpl(GroupRepository groupRepository, StudentRepository studentRepository) {
+    public UserServiceImpl(GroupRepository groupRepository, StudentRepository studentRepository, PasswordEncoder passwordEncoder) {
         this.groupRepository = groupRepository;
         this.studentRepository = studentRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public void register(RegisterDto registerDto) {
@@ -40,7 +43,7 @@ public class UserServiceImpl implements UserService {
         if (student == null) {
             throw new ResourceNotFoundException("Пользователь с данным e-mail не найден");
         }
-        student.setPassword(registerDto.getPassword());
+        student.setPassword(passwordEncoder.encode(registerDto.getPassword()));
         studentRepository.save(student);
     }
 

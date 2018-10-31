@@ -1,5 +1,6 @@
 package com.itis.service.controller;
 
+import com.itis.service.dto.ExceptionResponseDto;
 import com.itis.service.exception.ITISException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -13,8 +14,8 @@ public class RestErrorHandlerController {
     @ExceptionHandler(ITISException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    public Object handleITISException(ITISException e) {
-        return e;
+    public ExceptionResponseDto handleITISException(ITISException e) {
+        return new ExceptionResponseDto(e);
     }
 
 }
