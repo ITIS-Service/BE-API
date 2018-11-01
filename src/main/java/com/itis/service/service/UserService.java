@@ -4,7 +4,7 @@ import com.itis.service.dto.RegisterDto;
 
 public interface UserService {
 
-    void register(RegisterDto registerDto);
+    String register(RegisterDto registerDto);
     void updateStudentList();
 
 }

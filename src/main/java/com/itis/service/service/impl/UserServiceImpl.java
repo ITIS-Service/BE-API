@@ -3,13 +3,12 @@ package com.itis.service.service.impl;
 import com.itis.service.dto.RegisterDto;
 import com.itis.service.entity.Group;
 import com.itis.service.entity.Student;
-import com.itis.service.exception.ITISException;
 import com.itis.service.exception.InitializeException;
 import com.itis.service.exception.RegistrationException;
 import com.itis.service.exception.ResourceNotFoundException;
-import com.itis.service.exception.codes.ErrorCode;
 import com.itis.service.repository.GroupRepository;
 import com.itis.service.repository.StudentRepository;
+import com.itis.service.security.JWTProvider;
 import com.itis.service.service.UserService;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -33,15 +32,17 @@ public class UserServiceImpl implements UserService {
     private final GroupRepository groupRepository;
     private final StudentRepository studentRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JWTProvider jwtProvider;
 
     @Autowired
-    public UserServiceImpl(GroupRepository groupRepository, StudentRepository studentRepository, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(GroupRepository groupRepository, StudentRepository studentRepository, PasswordEncoder passwordEncoder, JWTProvider jwtProvider) {
         this.groupRepository = groupRepository;
         this.studentRepository = studentRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtProvider = jwtProvider;
     }
 
-    public void register(RegisterDto registerDto) {
+    public String register(RegisterDto registerDto) {
         Student student = studentRepository.findByEmail(registerDto.getEmail());
         if (student == null) {
             throw new ResourceNotFoundException("Пользователь с данным e-mail не найден");
@@ -51,6 +52,7 @@ public class UserServiceImpl implements UserService {
         }
         student.setPassword(passwordEncoder.encode(registerDto.getPassword()));
         studentRepository.save(student);
+        return jwtProvider.createToken(student);
     }
 
     public void updateStudentList() {
