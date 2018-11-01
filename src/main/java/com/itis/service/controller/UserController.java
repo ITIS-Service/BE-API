@@ -8,14 +8,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
 @RestController
+@RequestMapping("/users")
 public class UserController {
 
     private final UserService userService;
@@ -27,7 +25,7 @@ public class UserController {
         this.studEmailaValidator = studEmailaValidator;
     }
 
-    @PostMapping("/users/register")
+    @PostMapping("/register")
     public ResponseEntity<ResponseDto> register(@Valid @RequestBody RegisterDto registerDto, Errors errors) {
         studEmailaValidator.validate(registerDto, errors);
         if (errors.hasErrors()) {
@@ -38,7 +36,7 @@ public class UserController {
         return new ResponseEntity<>(new ResponseDto("Пароль установлен", true), HttpStatus.OK);
     }
 
-    @GetMapping("/users/initialize")
+    @GetMapping("/initialize")
     public ResponseDto initialize() {
         userService.updateStudentList();
         return new ResponseDto("Студенты обновлены в базе данных", true);
