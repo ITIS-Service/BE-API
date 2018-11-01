@@ -3,8 +3,11 @@ package com.itis.service.service.impl;
 import com.itis.service.dto.RegisterDto;
 import com.itis.service.entity.Group;
 import com.itis.service.entity.Student;
+import com.itis.service.exception.ITISException;
 import com.itis.service.exception.InitializeException;
+import com.itis.service.exception.RegistrationException;
 import com.itis.service.exception.ResourceNotFoundException;
+import com.itis.service.exception.codes.ErrorCode;
 import com.itis.service.repository.GroupRepository;
 import com.itis.service.repository.StudentRepository;
 import com.itis.service.service.UserService;
@@ -42,6 +45,9 @@ public class UserServiceImpl implements UserService {
         Student student = studentRepository.findByEmail(registerDto.getEmail());
         if (student == null) {
             throw new ResourceNotFoundException("Пользователь с данным e-mail не найден");
+        }
+        if (student.getPassword() != null) {
+            throw new RegistrationException();
         }
         student.setPassword(passwordEncoder.encode(registerDto.getPassword()));
         studentRepository.save(student);
