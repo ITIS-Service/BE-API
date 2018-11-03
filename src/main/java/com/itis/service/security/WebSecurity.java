@@ -1,6 +1,10 @@
 package com.itis.service.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.itis.service.dto.LoginResponseDto;
+import com.itis.service.service.UserService;
 import com.itis.service.service.impl.UserDetailsServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -9,19 +13,25 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.io.PrintWriter;
 
 @EnableWebSecurity
 public class WebSecurity extends WebSecurityConfigurerAdapter {
 
     private UserDetailsServiceImpl userDetailsService;
     private PasswordEncoder passwordEncoder;
+    private UserService userService;
 
-    public WebSecurity(UserDetailsServiceImpl userDetailsService, PasswordEncoder passwordEncoder) {
+    @Autowired
+    public WebSecurity(UserDetailsServiceImpl userDetailsService, PasswordEncoder passwordEncoder, UserService userService) {
         this.userDetailsService = userDetailsService;
         this.passwordEncoder = passwordEncoder;
+        this.userService = userService;
     }
 
     @Override
@@ -53,7 +63,20 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
     private JWTAuthenticationFilter jwtAuthenticationFilter() throws Exception {
         JWTAuthenticationFilter jwtAuthenticationFilter = new JWTAuthenticationFilter(authenticationManager());
         jwtAuthenticationFilter.setFilterProcessesUrl("/users/login");
+        jwtAuthenticationFilter.setAuthenticationSuccessHandler(successHandler());
         return jwtAuthenticationFilter;
+    }
+
+    private AuthenticationSuccessHandler successHandler() {
+        return (request, response, authentication) -> {
+            ObjectMapper objectMapper = new ObjectMapper();
+
+            LoginResponseDto loginResponse = userService.loginUser(((org.springframework.security.core.userdetails.User) authentication.getPrincipal()).getUsername());
+            response.setContentType("application/json; charset=UTF-8");
+            response.setCharacterEncoding("UTF-8");
+            PrintWriter out = response.getWriter();
+            out.println(objectMapper.writeValueAsString(loginResponse));
+        };
     }
 
 }

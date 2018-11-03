@@ -33,7 +33,7 @@ public class Point {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id")
-    private Course course;
+    private CourseDetails courseDetails;
 
     @ManyToMany(mappedBy = "points")
     private List<User> users = new ArrayList<>();

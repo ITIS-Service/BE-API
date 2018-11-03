@@ -1,5 +1,6 @@
 package com.itis.service.service.impl;
 
+import com.itis.service.dto.LoginResponseDto;
 import com.itis.service.dto.RegisterDto;
 import com.itis.service.entity.Group;
 import com.itis.service.entity.Student;
@@ -19,10 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -53,6 +51,17 @@ public class UserServiceImpl implements UserService {
         student.setPassword(passwordEncoder.encode(registerDto.getPassword()));
         studentRepository.save(student);
         return jwtProvider.createToken(student);
+    }
+
+    public LoginResponseDto loginUser(String email) {
+        Student student = studentRepository.findByEmail(email);
+        if (student == null) {
+            throw new ResourceNotFoundException("Пользователь с email адресом " + email + " не найден");
+        }
+
+        return LoginResponseDto.builder()
+                .isPassedQuiz(student.isPassedQuiz())
+                .build();
     }
 
     public void updateStudentList() {

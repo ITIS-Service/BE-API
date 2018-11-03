@@ -34,7 +34,7 @@ public class UserCourse {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("courseID")
-    private Course course;
+    private CourseDetails courseDetails;
 
     @Column(name = "status")
     private UserCourseStatus status;

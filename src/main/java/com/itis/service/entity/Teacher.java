@@ -1,6 +1,5 @@
 package com.itis.service.entity;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -18,6 +17,6 @@ public class Teacher extends User {
     private String link;
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "teacher")
-    private List<Course> courses;
+    private List<CourseDetails> courseDetails;
 
 }
