@@ -15,6 +15,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,8 @@ import java.util.regex.Pattern;
 
 @Service
 public class UserServiceImpl implements UserService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(UserServiceImpl.class);
 
     private final GroupRepository groupRepository;
     private final StudentRepository studentRepository;
@@ -65,10 +69,14 @@ public class UserServiceImpl implements UserService {
     }
 
     public void updateStudentList() {
-        studentRepository.deleteAll();
-        groupRepository.deleteAll();
+        if (studentRepository.count() != 0 && groupRepository.count() != 0) {
+            LOG.info("Students and Groups initialized");
+            return;
+        }
 
-        Set<Group> groups = new HashSet<>();
+        LOG.info("Start fetching students and groups from kpfu.ru...");
+
+        List<Group> groups = new ArrayList<>();
         List<Student> students = new ArrayList<>();
 
         try {
@@ -98,7 +106,11 @@ public class UserServiceImpl implements UserService {
                         String email = matcherLink.group(1) + "@stud.kpfu.ru";
 
                         Group group = new Group(groupName, Integer.parseInt(courseNumber));
-                        groups.add(group);
+                        if (groups.contains(group)) {
+                            group = groups.get(groups.indexOf(group));
+                        } else {
+                            groups.add(group);
+                        }
 
                         Student student = new Student(email, null, name[0], name[1], group);
                         students.add(student);
@@ -106,13 +118,39 @@ public class UserServiceImpl implements UserService {
                 }
             }
 
-            groupRepository.saveAll(groups);
-            groupRepository.flush();
             studentRepository.saveAll(students);
             studentRepository.flush();
+
+            LOG.info("Students and groups fetched successfully!");
         } catch (IOException e) {
             throw new InitializeException();
         }
+    }
+
+    public void createTestStudents() {
+        if (studentRepository.count() != 0 && groupRepository.count() != 0) {
+            LOG.info("Students and Groups initialized");
+            return;
+        }
+
+        LOG.info("Start creating test students and groups");
+
+        String kpfuDomen = "stud.kpfu.ru";
+
+        Group group504 = new Group("11-504", 4);
+        Group group604 = new Group("11-604", 3);
+        Group group704 = new Group("11-704", 2);
+        Group group804 = new Group("11-804", 1);
+
+        Student student504 = new Student("11-504@" + kpfuDomen, passwordEncoder.encode("qwe123"), "Student", "11-504", group504);
+        Student student604 = new Student("11-604@" + kpfuDomen, passwordEncoder.encode("qwe123"), "Student", "11-604", group604);
+        Student student704 = new Student("11-704@" + kpfuDomen, passwordEncoder.encode("qwe123"), "Student", "11-704", group704);
+        Student student804 = new Student("11-804@" + kpfuDomen, passwordEncoder.encode("qwe123"), "Student", "11-804", group804);
+
+        studentRepository.saveAll(Arrays.asList(student504, student604, student704, student804));
+        studentRepository.flush();
+
+        LOG.info("Test students and group created");
     }
 
 }

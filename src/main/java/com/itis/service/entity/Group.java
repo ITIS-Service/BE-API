@@ -22,7 +22,7 @@ public class Group {
     @Column(name = "group_id", length = 6, nullable = false)
     private Long id;
 
-    @Column(name = "group_name")
+    @Column(name = "group_name", unique = true)
     private String name;
 
     @Column(name = "group_course", nullable = false)
