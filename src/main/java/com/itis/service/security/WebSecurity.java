@@ -27,6 +27,14 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
     private PasswordEncoder passwordEncoder;
     private UserService userService;
 
+    private static final String[] AUTH_WHITELIST = {
+            // -- Swagger UI --- //
+            "/swagger-resources/**",
+            "/swagger-ui.html",
+            "/v2/api-docs",
+            "/webjars/**"
+    };
+
     @Autowired
     public WebSecurity(UserDetailsServiceImpl userDetailsService, PasswordEncoder passwordEncoder, UserService userService) {
         this.userDetailsService = userDetailsService;
@@ -37,6 +45,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.cors().and().csrf().disable().authorizeRequests()
+                .antMatchers(AUTH_WHITELIST).permitAll()
                 .antMatchers(HttpMethod.POST, SecurityConstants.SIGN_UP_URL).permitAll()
                 .anyRequest().authenticated()
                 .and()
@@ -51,6 +60,18 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder);
+    }
+
+    @Override
+    public void configure(org.springframework.security.config.annotation.web.builders.WebSecurity web) {
+        web.ignoring().antMatchers(
+                "/v2/api-docs",
+                "/configuration/ui",
+                "/swagger-resources",
+                "/configuration/security",
+                "/swagger-ui.html",
+                "/webjars/**"
+        );
     }
 
     @Bean

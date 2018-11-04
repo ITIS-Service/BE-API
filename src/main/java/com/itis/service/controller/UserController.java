@@ -5,6 +5,8 @@ import com.itis.service.dto.ResponseDto;
 import com.itis.service.security.SecurityConstants;
 import com.itis.service.service.UserService;
 import com.itis.service.validators.StudEmailaValidator;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +17,7 @@ import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/users")
+@Api(value = "users", description = "Operating with student actions")
 public class UserController {
 
     private final UserService userService;
@@ -26,6 +29,7 @@ public class UserController {
         this.studEmailaValidator = studEmailaValidator;
     }
 
+    @ApiOperation(value = "Register new student with new password", response = ResponseDto.class)
     @PostMapping("/registration")
     public ResponseEntity<ResponseDto> register(@Valid @RequestBody RegisterDto registerDto, Errors errors) {
         studEmailaValidator.validate(registerDto, errors);
@@ -44,6 +48,7 @@ public class UserController {
                 .body(new ResponseDto("Пароль установлен", true));
     }
 
+    @ApiOperation(value = "Initialize database with students from kpfu.ru", response = ResponseDto.class)
     @GetMapping("/initialize")
     public ResponseDto initialize() {
         userService.updateStudentList();
