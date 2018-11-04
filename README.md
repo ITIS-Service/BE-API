@@ -1,4 +1,4 @@
-# ITIS Service Courses API
+# ITIS Courses API
 
 ## Setup
 
