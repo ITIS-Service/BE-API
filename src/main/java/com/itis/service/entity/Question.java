@@ -1,8 +1,6 @@
 package com.itis.service.entity;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -10,8 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@Getter @Setter
-@NoArgsConstructor
+@Getter
+@Setter(value = AccessLevel.PACKAGE)
+@NoArgsConstructor(access = AccessLevel.PACKAGE)
+@AllArgsConstructor(access = AccessLevel.PACKAGE)
+@Builder
 @Entity
 @Table(name = "questions")
 public class Question {
@@ -25,11 +26,25 @@ public class Question {
     @Column(name = "question_title")
     private String title;
 
-    @Column(name = "question_description")
-    private String description;
-
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "question", orphanRemoval = true)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "question", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Answer> answers = new ArrayList<>();
+
+    public static QuestionBuilder builder() {
+        return new CustomQuestionBuilder();
+    }
+
+    public static class CustomQuestionBuilder extends QuestionBuilder {
+
+        @Override
+        public Question build() {
+            Question question = super.build();
+            for (Answer answer : super.answers) {
+                answer.setQuestion(question);
+            }
+            return question;
+        }
+
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -37,12 +52,11 @@ public class Question {
         if (o == null || getClass() != o.getClass()) return false;
         Question question = (Question) o;
         return Objects.equals(id, question.id) &&
-                Objects.equals(title, question.title) &&
-                Objects.equals(description, question.description);
+                Objects.equals(title, question.title);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, title, description);
+        return Objects.hash(id, title);
     }
 }
