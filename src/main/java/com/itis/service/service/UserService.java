@@ -8,5 +8,6 @@ public interface UserService {
     String register(RegisterDto registerDto);
     LoginResponseDto loginUser(String email);
     void updateStudentList();
+    void createTestStudents();
 
 }
