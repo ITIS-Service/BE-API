@@ -2,6 +2,7 @@ package com.itis.service.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itis.service.dto.LoginResponseDto;
+import com.itis.service.entity.enums.UserRole;
 import com.itis.service.service.UserService;
 import com.itis.service.service.impl.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +48,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
         http.cors().and().csrf().disable().authorizeRequests()
                 .antMatchers(AUTH_WHITELIST).permitAll()
                 .antMatchers(HttpMethod.POST, SecurityConstants.SIGN_UP_URL).permitAll()
+                .antMatchers("/admin**").hasAnyAuthority(UserRole.SUPERADMIN.name(), UserRole.ADMIN.name())
                 .anyRequest().authenticated()
                 .and()
                 .addFilter(jwtAuthenticationFilter())
