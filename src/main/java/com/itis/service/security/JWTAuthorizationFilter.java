@@ -2,9 +2,13 @@ package com.itis.service.security;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.itis.service.service.impl.UserDetailsServiceImpl;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 import javax.servlet.FilterChain;
@@ -16,8 +20,15 @@ import java.util.ArrayList;
 
 public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
 
+    private UserDetailsService userDetailsService;
+
     JWTAuthorizationFilter(AuthenticationManager authenticationManager) {
         super(authenticationManager);
+    }
+
+    public JWTAuthorizationFilter(AuthenticationManager authenticationManager, UserDetailsServiceImpl userDetailsService) {
+        super(authenticationManager);
+        this.userDetailsService = userDetailsService;
     }
 
     @Override
@@ -46,7 +57,8 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
                     .getSubject();
 
             if (user != null) {
-                return new UsernamePasswordAuthenticationToken(user, null, new ArrayList<>());
+                UserDetails userDetails = userDetailsService.loadUserByUsername(user);
+                return new UsernamePasswordAuthenticationToken(user, null, userDetails.getAuthorities());
             }
             return null;
         }
