@@ -26,7 +26,7 @@ public class Question {
     @Column(name = "question_title")
     private String title;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "question", orphanRemoval = true, cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "question", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Answer> answers = new ArrayList<>();
 
     public static QuestionBuilder builder() {

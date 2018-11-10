@@ -47,6 +47,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
         http.cors().and().csrf().disable().authorizeRequests()
                 .antMatchers(AUTH_WHITELIST).permitAll()
                 .antMatchers(HttpMethod.POST, SecurityConstants.SIGN_UP_URL).permitAll()
+                .antMatchers("/users/**").hasRole("STUDENT")
                 .anyRequest().authenticated()
                 .and()
                 .addFilter(jwtAuthenticationFilter())
@@ -92,7 +93,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
         return (request, response, authentication) -> {
             ObjectMapper objectMapper = new ObjectMapper();
 
-            LoginResponseDto loginResponse = userService.loginUser(((org.springframework.security.core.userdetails.User) authentication.getPrincipal()).getUsername());
+            LoginResponseDto loginResponse = userService.loginUser(((UserPrincipal) authentication.getPrincipal()).getUsername());
             response.setContentType("application/json; charset=UTF-8");
             response.setCharacterEncoding("UTF-8");
             PrintWriter out = response.getWriter();
