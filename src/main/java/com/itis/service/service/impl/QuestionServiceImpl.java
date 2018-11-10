@@ -1,5 +1,7 @@
 package com.itis.service.service.impl;
 
+import com.itis.service.dto.AnswerDto;
+import com.itis.service.dto.QuestionDto;
 import com.itis.service.entity.Answer;
 import com.itis.service.entity.Question;
 import com.itis.service.repository.QuestionRepository;
@@ -11,6 +13,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class QuestionServiceImpl implements QuestionService {
@@ -22,6 +26,18 @@ public class QuestionServiceImpl implements QuestionService {
     @Autowired
     public QuestionServiceImpl(QuestionRepository questionRepository) {
         this.questionRepository = questionRepository;
+    }
+
+    public List<QuestionDto> fetchAll() {
+        List<Question> questions = questionRepository.findAll();
+        return questions.stream().map(question -> {
+            List<AnswerDto> answersDto = question
+                    .getAnswers()
+                    .stream()
+                    .map(answer -> new AnswerDto(answer.getId(), answer.getTitle())).collect(Collectors.toList());
+
+            return new QuestionDto(question.getId(), question.getTitle(), answersDto);
+        }).collect(Collectors.toList());
     }
 
     public void createQuestionsIfNeeded() {
