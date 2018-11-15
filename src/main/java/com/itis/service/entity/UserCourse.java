@@ -9,7 +9,7 @@ import java.io.Serializable;
 @Entity
 @Data
 @NoArgsConstructor
-@Table(name = "users_and_courses")
+@Table(name = "students_and_courses")
 public class UserCourse {
 
     @Embeddable

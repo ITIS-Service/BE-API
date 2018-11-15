@@ -36,7 +36,7 @@ public class Point {
     private CourseDetails courseDetails;
 
     @ManyToMany(mappedBy = "points")
-    private List<User> users = new ArrayList<>();
+    private List<Student> users = new ArrayList<>();
 
     @Override
     public boolean equals(Object o) {

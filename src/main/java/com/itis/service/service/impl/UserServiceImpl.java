@@ -37,7 +37,10 @@ public class UserServiceImpl implements UserService {
     private final JWTProvider jwtProvider;
 
     @Autowired
-    public UserServiceImpl(GroupRepository groupRepository, StudentRepository studentRepository, PasswordEncoder passwordEncoder, JWTProvider jwtProvider) {
+    public UserServiceImpl(GroupRepository groupRepository,
+                           StudentRepository studentRepository,
+                           PasswordEncoder passwordEncoder,
+                           JWTProvider jwtProvider) {
         this.groupRepository = groupRepository;
         this.studentRepository = studentRepository;
         this.passwordEncoder = passwordEncoder;
@@ -52,9 +55,11 @@ public class UserServiceImpl implements UserService {
         if (student.getPassword() != null) {
             throw new RegistrationException();
         }
+
         student.setPassword(passwordEncoder.encode(registerDto.getPassword()));
         studentRepository.save(student);
-        return jwtProvider.createToken(student);
+
+        return jwtProvider.createToken(student.getRole().toString(), student.getEmail());
     }
 
     public LoginResponseDto loginUser(String email) {
