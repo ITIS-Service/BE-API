@@ -27,7 +27,7 @@ public class Answer {
     private String title;
 
     @Column(name = "answer_tags")
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private List<String> tags = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)

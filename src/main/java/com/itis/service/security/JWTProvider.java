@@ -2,7 +2,6 @@ package com.itis.service.security;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.itis.service.entity.User;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -10,9 +9,10 @@ import java.util.Date;
 @Component
 public class JWTProvider {
 
-    public String createToken(User user) {
+    public String createToken(String authorities, String email) {
         return JWT.create()
-                .withSubject(user.getEmail())
+                .withSubject(email)
+                .withClaim(SecurityConstants.AUTHORITIES_KEY, authorities)
                 .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
                 .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
     }

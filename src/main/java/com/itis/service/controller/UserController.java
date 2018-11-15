@@ -1,8 +1,6 @@
 package com.itis.service.controller;
 
-import com.itis.service.dto.QuestionDto;
-import com.itis.service.dto.RegisterDto;
-import com.itis.service.dto.ResponseDto;
+import com.itis.service.dto.*;
 import com.itis.service.security.SecurityConstants;
 import com.itis.service.service.QuestionService;
 import com.itis.service.service.UserService;
@@ -12,11 +10,12 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
+import java.util.*;
 
 @RestController
 @RequestMapping("/users")
@@ -59,6 +58,13 @@ public class UserController {
     @GetMapping("/questions")
     public List<QuestionDto> getQuestions() {
         return questionService.fetchAll();
+    }
+
+    @ApiOperation(value = "Send selected answers", response = ResponseDto.class)
+    @PostMapping("/answers")
+    public ResponseDto acceptAnswers(@RequestBody AcceptAnswersDto answersDto, Authentication authentication) {
+        questionService.acceptAnswers(answersDto.getAnswers(), authentication.getName());
+        return new ResponseDto("Ответы успешно приняты", true);
     }
 
 }

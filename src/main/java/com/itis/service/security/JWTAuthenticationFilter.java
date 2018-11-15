@@ -1,7 +1,5 @@
 package com.itis.service.security;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itis.service.dto.LoginDto;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,15 +15,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.stream.Collectors;
 
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private AuthenticationManager authenticationManager;
+    private JWTProvider provider;
 
     JWTAuthenticationFilter(AuthenticationManager authenticationManager) {
         this.authenticationManager = authenticationManager;
+        this.provider = new JWTProvider();
     }
 
     @Override
@@ -53,11 +52,9 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
 
-        String token = JWT.create()
-                .withSubject(((UserPrincipal) authResult.getPrincipal()).getUsername())
-                .withClaim(SecurityConstants.AUTHORITIES_KEY, authorities)
-                .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
-                .sign(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()));
+        UserPrincipal userPrincipal = (UserPrincipal) authResult.getPrincipal();
+
+        String token = provider.createToken(authorities, userPrincipal.getUsername());
         response.addHeader(SecurityConstants.HEADER_STRING, SecurityConstants.TOKEN_PREFIX + token);
         super.successfulAuthentication(request, response, chain, authResult);
     }

@@ -2,18 +2,16 @@ package com.itis.service.service.impl;
 
 import com.itis.service.dto.AnswerDto;
 import com.itis.service.dto.QuestionDto;
-import com.itis.service.entity.Answer;
-import com.itis.service.entity.Question;
-import com.itis.service.repository.QuestionRepository;
+import com.itis.service.entity.*;
+import com.itis.service.exception.ResourceNotFoundException;
+import com.itis.service.repository.*;
 import com.itis.service.service.QuestionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,10 +20,20 @@ public class QuestionServiceImpl implements QuestionService {
     private static final Logger LOG = LoggerFactory.getLogger(QuestionServiceImpl.class);
 
     private final QuestionRepository questionRepository;
+    private final AnswerRepository answerRepository;
+    private final CourseRepository courseRepository;
+    private final StudentRepository studentRepository;
 
     @Autowired
-    public QuestionServiceImpl(QuestionRepository questionRepository) {
+    public QuestionServiceImpl(
+            QuestionRepository questionRepository,
+            AnswerRepository answerRepository,
+            CourseRepository courseRepository,
+            StudentRepository studentRepository) {
         this.questionRepository = questionRepository;
+        this.answerRepository = answerRepository;
+        this.courseRepository = courseRepository;
+        this.studentRepository = studentRepository;
     }
 
     public List<QuestionDto> fetchAll() {
@@ -38,6 +46,32 @@ public class QuestionServiceImpl implements QuestionService {
 
             return new QuestionDto(question.getId(), question.getTitle(), answersDto);
         }).collect(Collectors.toList());
+    }
+
+    public void acceptAnswers(Map<Long, Long> answers, String studentEmail) {
+        Student student = studentRepository.findByEmail(studentEmail);
+        if (student == null) {
+            throw new ResourceNotFoundException("Студент с почтой " + studentEmail + " не найден");
+        }
+
+        Integer userCourseNumber = student.getGroup().getCourse();
+
+        List<Course> suggestedCourses = new ArrayList<>();
+
+        for (Map.Entry<Long, Long> mapAnswers : answers.entrySet()) {
+            Answer answer = answerRepository.findById(mapAnswers.getValue()).orElseThrow(
+                    () -> new ResourceNotFoundException("Ответ с ID = " + mapAnswers.getValue() + " не найден")
+            );
+
+            for (String tag : answer.getTags()) {
+                List<Course> courses = courseRepository.findByTagAndNumber(tag, userCourseNumber);
+                suggestedCourses.addAll(courses);
+            }
+        }
+
+        student.setPassedQuiz(true);
+        student.setSuggestedCourses(suggestedCourses);
+        studentRepository.saveAndFlush(student);
     }
 
     public void createQuestionsIfNeeded() {
