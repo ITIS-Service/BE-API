@@ -1,5 +1,6 @@
 package com.itis.service.initializer;
 
+import com.itis.service.service.QuestionService;
 import com.itis.service.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,11 +19,13 @@ public class LaunchInitializer {
 
     private final Environment environment;
     private final UserService userService;
+    private final QuestionService questionService;
 
     @Autowired
-    public LaunchInitializer(Environment environment, UserService userService) {
+    public LaunchInitializer(Environment environment, UserService userService, QuestionService questionService) {
         this.environment = environment;
         this.userService = userService;
+        this.questionService = questionService;
     }
 
     @PostConstruct
@@ -34,6 +37,7 @@ public class LaunchInitializer {
         } else if (activeProfiles.contains("production")) {
             userService.createTestStudents();
         }
+        questionService.createQuestionsIfNeeded();
     }
 
 }

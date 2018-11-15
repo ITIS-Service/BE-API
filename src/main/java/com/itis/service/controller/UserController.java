@@ -1,8 +1,10 @@
 package com.itis.service.controller;
 
+import com.itis.service.dto.QuestionDto;
 import com.itis.service.dto.RegisterDto;
 import com.itis.service.dto.ResponseDto;
 import com.itis.service.security.SecurityConstants;
+import com.itis.service.service.QuestionService;
 import com.itis.service.service.UserService;
 import com.itis.service.validators.StudEmailaValidator;
 import io.swagger.annotations.Api;
@@ -14,6 +16,7 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/users")
@@ -21,11 +24,15 @@ import javax.validation.Valid;
 public class UserController {
 
     private final UserService userService;
+    private final QuestionService questionService;
     private final StudEmailaValidator studEmailaValidator;
 
     @Autowired
-    public UserController(UserService userService, StudEmailaValidator studEmailaValidator) {
+    public UserController(UserService userService,
+                          QuestionService questionService,
+                          StudEmailaValidator studEmailaValidator) {
         this.userService = userService;
+        this.questionService = questionService;
         this.studEmailaValidator = studEmailaValidator;
     }
 
@@ -48,11 +55,10 @@ public class UserController {
                 .body(new ResponseDto("Пароль установлен", true));
     }
 
-    @ApiOperation(value = "Initialize database with students from kpfu.ru", response = ResponseDto.class)
-    @GetMapping("/initialize")
-    public ResponseDto initialize() {
-        userService.updateStudentList();
-        return new ResponseDto("Студенты обновлены в базе данных", true);
+    @ApiOperation(value = "Get all questions", response = QuestionDto[].class)
+    @GetMapping("/questions")
+    public List<QuestionDto> getQuestions() {
+        return questionService.fetchAll();
     }
 
 }
