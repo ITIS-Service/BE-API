@@ -5,19 +5,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 
 @Getter @Setter
 @NoArgsConstructor
 @Entity
 @Table(name = "users")
+@Inheritance(strategy = InheritanceType.JOINED)
 public class User {
 
     @Id
@@ -38,23 +34,8 @@ public class User {
     @Column(name = "user_last_name")
     private String lastName;
 
-    @Column(name = "user_passed_quiz")
-    private boolean isPassedQuiz;
-
     @Column(name = "user_role")
     private UserRole role;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserCourse> userCourses = new ArrayList<>();
-
-    @ManyToMany(cascade = {
-            CascadeType.PERSIST,
-            CascadeType.MERGE
-    })
-    @JoinTable(name = "users_and_points",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "point_id"))
-    private List<Point> points = new ArrayList<>();
 
     public User(String email, String password, String firstName, String lastName, UserRole role) {
         this.email = email;

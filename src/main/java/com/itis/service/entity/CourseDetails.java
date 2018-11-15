@@ -34,10 +34,6 @@ public class CourseDetails {
     @Column(name = "course_place")
     private String place;
 
-    @Column(name = "course_tags")
-    @ElementCollection
-    private List<String> tags = new ArrayList<>();
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "teacher_id", nullable = false)
     private Teacher teacher;
@@ -60,12 +56,11 @@ public class CourseDetails {
                 Objects.equals(course, that.course) &&
                 Objects.equals(times, that.times) &&
                 Objects.equals(place, that.place) &&
-                Objects.equals(tags, that.tags) &&
                 Objects.equals(teacher, that.teacher);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, course, times, place, tags, teacher);
+        return Objects.hash(id, course, times, place, teacher);
     }
 }

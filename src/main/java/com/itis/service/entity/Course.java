@@ -6,6 +6,8 @@ import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Getter @Setter
@@ -25,6 +27,13 @@ public class Course {
 
     @Column(name = "course_description")
     private String description;
+
+    @Column(name = "course_tags")
+    @ElementCollection
+    private List<String> tags = new ArrayList<>();
+
+    @Column(name = "course_number")
+    private Integer number;
 
     @OneToOne(mappedBy = "course", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
     private CourseDetails courseDetails;
