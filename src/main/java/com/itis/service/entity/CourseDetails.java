@@ -6,7 +6,6 @@ import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -27,9 +26,8 @@ public class CourseDetails {
     @JoinColumn(name = "course_id")
     private Course course;
 
-    @Column(name = "course_times")
-    @ElementCollection
-    private List<LocalTime> times = new ArrayList<>();
+    @OneToMany(mappedBy = "courseDetails", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DayTime> dayTimes = new ArrayList<>();
 
     @Column(name = "course_place")
     private String place;
@@ -47,6 +45,13 @@ public class CourseDetails {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "courseDetails", orphanRemoval = true)
     private List<Request> requests = new ArrayList<>();
 
+    public CourseDetails(Course course, List<DayTime> dayTimes, String place, Teacher teacher) {
+        this.course = course;
+        this.dayTimes = dayTimes;
+        this.place = place;
+        this.teacher = teacher;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -54,13 +59,13 @@ public class CourseDetails {
         CourseDetails that = (CourseDetails) o;
         return Objects.equals(id, that.id) &&
                 Objects.equals(course, that.course) &&
-                Objects.equals(times, that.times) &&
+                Objects.equals(dayTimes, that.dayTimes) &&
                 Objects.equals(place, that.place) &&
                 Objects.equals(teacher, that.teacher);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, course, times, place, teacher);
+        return Objects.hash(id, course, dayTimes, place, teacher);
     }
 }

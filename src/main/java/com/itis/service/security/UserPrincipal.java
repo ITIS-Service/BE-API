@@ -2,6 +2,7 @@ package com.itis.service.security;
 
 import com.itis.service.entity.User;
 import com.itis.service.entity.enums.UserRole;
+import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+@Data
 public class UserPrincipal implements UserDetails {
 
     private User user;

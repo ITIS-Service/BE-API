@@ -22,7 +22,7 @@ public class Course {
     @Column(name = "course_id", length = 6, nullable = false)
     private Long id;
 
-    @Column(name = "course_name")
+    @Column(name = "course_name", unique = true)
     private String name;
 
     @Column(name = "course_description")
@@ -37,6 +37,13 @@ public class Course {
 
     @OneToOne(mappedBy = "course", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
     private CourseDetails courseDetails;
+
+    public Course(String name, String description, List<String> tags, Integer number) {
+        this.name = name;
+        this.description = description;
+        this.tags = tags;
+        this.number = number;
+    }
 
     @Override
     public boolean equals(Object o) {

@@ -1,14 +1,16 @@
 package com.itis.service.service.impl;
 
-import com.itis.service.dto.LoginResponseDto;
 import com.itis.service.dto.RegisterDto;
 import com.itis.service.entity.Group;
 import com.itis.service.entity.Student;
+import com.itis.service.entity.User;
+import com.itis.service.entity.enums.UserRole;
 import com.itis.service.exception.InitializeException;
 import com.itis.service.exception.RegistrationException;
 import com.itis.service.exception.ResourceNotFoundException;
 import com.itis.service.repository.GroupRepository;
 import com.itis.service.repository.StudentRepository;
+import com.itis.service.repository.UserRepository;
 import com.itis.service.security.JWTProvider;
 import com.itis.service.service.UserService;
 import org.jsoup.Jsoup;
@@ -33,16 +35,19 @@ public class UserServiceImpl implements UserService {
 
     private final GroupRepository groupRepository;
     private final StudentRepository studentRepository;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JWTProvider jwtProvider;
 
     @Autowired
     public UserServiceImpl(GroupRepository groupRepository,
                            StudentRepository studentRepository,
+                           UserRepository userRepository,
                            PasswordEncoder passwordEncoder,
                            JWTProvider jwtProvider) {
         this.groupRepository = groupRepository;
         this.studentRepository = studentRepository;
+        this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtProvider = jwtProvider;
     }
@@ -60,17 +65,6 @@ public class UserServiceImpl implements UserService {
         studentRepository.save(student);
 
         return jwtProvider.createToken(student.getRole().toString(), student.getEmail());
-    }
-
-    public LoginResponseDto loginUser(String email) {
-        Student student = studentRepository.findByEmail(email);
-        if (student == null) {
-            throw new ResourceNotFoundException("Пользователь с email адресом " + email + " не найден");
-        }
-
-        return LoginResponseDto.builder()
-                .isPassedQuiz(student.isPassedQuiz())
-                .build();
     }
 
     public void updateStudentList() {
@@ -129,6 +123,25 @@ public class UserServiceImpl implements UserService {
             LOG.info("Students and groups fetched successfully!");
         } catch (IOException e) {
             throw new InitializeException();
+        }
+    }
+
+    public void createAdmin() {
+        User admin = userRepository.findByRole(UserRole.ADMIN);
+        if (admin == null) {
+            LOG.info("Creating new admin...");
+            admin = new User(
+                    "admin@itis.kpfu.ru",
+                    passwordEncoder.encode("qwe123"),
+                    "ITIS",
+                    "Admin",
+                    UserRole.ADMIN
+            );
+
+            userRepository.saveAndFlush(admin);
+            LOG.info("Admin created successfully");
+        } else {
+            LOG.info("Admin already exists");
         }
     }
 

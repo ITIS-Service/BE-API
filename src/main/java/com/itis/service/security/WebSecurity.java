@@ -2,7 +2,8 @@ package com.itis.service.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itis.service.dto.LoginResponseDto;
-import com.itis.service.service.UserService;
+import com.itis.service.entity.Student;
+import com.itis.service.entity.enums.UserRole;
 import com.itis.service.service.impl.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -25,7 +26,6 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 
     private UserDetailsServiceImpl userDetailsService;
     private PasswordEncoder passwordEncoder;
-    private UserService userService;
 
     private static final String[] AUTH_WHITELIST = {
             // -- Swagger UI --- //
@@ -36,10 +36,9 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
     };
 
     @Autowired
-    public WebSecurity(UserDetailsServiceImpl userDetailsService, PasswordEncoder passwordEncoder, UserService userService) {
+    public WebSecurity(UserDetailsServiceImpl userDetailsService, PasswordEncoder passwordEncoder) {
         this.userDetailsService = userDetailsService;
         this.passwordEncoder = passwordEncoder;
-        this.userService = userService;
     }
 
     @Override
@@ -48,6 +47,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
                 .antMatchers(AUTH_WHITELIST).permitAll()
                 .antMatchers(HttpMethod.POST, SecurityConstants.SIGN_UP_URL).permitAll()
                 .antMatchers("/users/**").hasRole("STUDENT")
+                .antMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
                 .and()
                 .addFilter(jwtAuthenticationFilter())
@@ -93,11 +93,19 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
         return (request, response, authentication) -> {
             ObjectMapper objectMapper = new ObjectMapper();
 
-            LoginResponseDto loginResponse = userService.loginUser(((UserPrincipal) authentication.getPrincipal()).getUsername());
-            response.setContentType("application/json; charset=UTF-8");
-            response.setCharacterEncoding("UTF-8");
-            PrintWriter out = response.getWriter();
-            out.println(objectMapper.writeValueAsString(loginResponse));
+            UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+            if (userPrincipal.getUser().getRole() == UserRole.STUDENT) {
+                Student student = (Student) userPrincipal.getUser();
+
+                LoginResponseDto loginResponse = LoginResponseDto.builder()
+                        .isPassedQuiz(student.isPassedQuiz())
+                        .build();
+
+                response.setContentType("application/json; charset=UTF-8");
+                response.setCharacterEncoding("UTF-8");
+                PrintWriter out = response.getWriter();
+                out.println(objectMapper.writeValueAsString(loginResponse));
+            }
         };
     }
 
