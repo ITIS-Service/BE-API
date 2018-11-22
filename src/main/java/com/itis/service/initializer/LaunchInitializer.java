@@ -37,6 +37,7 @@ public class LaunchInitializer {
         } else if (activeProfiles.contains("production")) {
             userService.createTestStudents();
         }
+        userService.createAdmin();
         questionService.createQuestionsIfNeeded();
     }
 
