@@ -1,5 +1,6 @@
 package com.itis.service.service.impl;
 
+import com.itis.service.dto.CreateTeacherDto;
 import com.itis.service.dto.TeacherDto;
 import com.itis.service.entity.Teacher;
 import com.itis.service.repository.TeacherRepository;
@@ -17,19 +18,23 @@ public class TeacherServiceImpl implements TeacherService {
         this.teacherRepository = teacherRepository;
     }
 
-    public TeacherDto create(TeacherDto teacherDto) {
+    public TeacherDto create(CreateTeacherDto createTeacherDto) {
         Teacher teacher = new Teacher(
-                teacherDto.getEmail(),
-                teacherDto.getFirstName(),
-                teacherDto.getLastName(),
-                teacherDto.getLink()
+                createTeacherDto.getEmail(),
+                createTeacherDto.getFirstName(),
+                createTeacherDto.getLastName(),
+                createTeacherDto.getLink()
         );
 
         teacherRepository.saveAndFlush(teacher);
 
-        teacherDto.setId(teacher.getId());
-
-        return teacherDto;
+        return new TeacherDto(
+                teacher.getId(),
+                teacher.getFirstName(),
+                teacher.getLastName(),
+                teacher.getEmail(),
+                teacher.getLink()
+        );
     }
 
 }
