@@ -1,7 +1,10 @@
 package com.itis.service.controller;
 
 import com.itis.service.dto.*;
+import com.itis.service.entity.CourseDetails;
+import com.itis.service.mapper.CourseDetailsMapper;
 import com.itis.service.security.SecurityConstants;
+import com.itis.service.service.CourseService;
 import com.itis.service.service.QuestionService;
 import com.itis.service.service.UserService;
 import com.itis.service.validators.StudEmailaValidator;
@@ -24,15 +27,22 @@ public class UserController {
 
     private final UserService userService;
     private final QuestionService questionService;
+    private final CourseService courseService;
+
     private final StudEmailaValidator studEmailaValidator;
+    private final CourseDetailsMapper courseDetailsMapper;
 
     @Autowired
     public UserController(UserService userService,
                           QuestionService questionService,
-                          StudEmailaValidator studEmailaValidator) {
+                          CourseService courseService,
+                          StudEmailaValidator studEmailaValidator,
+                          CourseDetailsMapper courseDetailsMapper) {
         this.userService = userService;
         this.questionService = questionService;
+        this.courseService = courseService;
         this.studEmailaValidator = studEmailaValidator;
+        this.courseDetailsMapper = courseDetailsMapper;
     }
 
     @ApiOperation(value = "Register new student with new password", response = ResponseDto.class)
@@ -65,6 +75,13 @@ public class UserController {
     public ResponseDto acceptAnswers(@RequestBody AcceptAnswersDto answersDto, Authentication authentication) {
         questionService.acceptAnswers(answersDto.getAnswers(), authentication.getName());
         return new ResponseDto("Ответы успешно приняты", true);
+    }
+
+    @ApiOperation(value = "Get course details")
+    @GetMapping("/courses/{courseID}/details")
+    public CourseDetailsDto getCourseDetails(@PathVariable long courseID) {
+        CourseDetails courseDetails = courseService.getDetails(courseID);
+        return courseDetailsMapper.courseDetailsToCourseDetailsDto(courseDetails);
     }
 
 }

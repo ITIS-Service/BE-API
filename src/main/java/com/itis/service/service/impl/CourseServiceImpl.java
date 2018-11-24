@@ -67,4 +67,12 @@ public class CourseServiceImpl implements CourseService {
         return courseDetails;
     }
 
+    public CourseDetails getDetails(long courseID) {
+        Course course = courseRepository.findById(courseID).orElseThrow(
+                () -> new ResourceNotFoundException(String.format("Курс с ID %d не найден", courseID))
+        );
+
+        return course.getCourseDetails();
+    }
+
 }

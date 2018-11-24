@@ -6,5 +6,6 @@ import com.itis.service.entity.CourseDetails;
 public interface CourseService {
 
     CourseDetails createCourse(CreateCourseDto createCourseDto);
+    CourseDetails getDetails(long courseID);
 
 }

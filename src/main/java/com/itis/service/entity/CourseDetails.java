@@ -26,13 +26,13 @@ public class CourseDetails {
     @JoinColumn(name = "course_id")
     private Course course;
 
-    @OneToMany(mappedBy = "courseDetails", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "courseDetails", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<DayTime> dayTimes = new ArrayList<>();
 
     @Column(name = "course_place")
     private String place;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "teacher_id", nullable = false)
     private Teacher teacher;
 
@@ -50,6 +50,10 @@ public class CourseDetails {
         this.dayTimes = dayTimes;
         this.place = place;
         this.teacher = teacher;
+
+        for (DayTime dayTime : dayTimes) {
+            dayTime.setCourseDetails(this);
+        }
     }
 
     @Override
