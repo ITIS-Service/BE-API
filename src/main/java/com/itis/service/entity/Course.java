@@ -25,7 +25,7 @@ public class Course {
     @Column(name = "course_name", unique = true)
     private String name;
 
-    @Column(name = "course_description")
+    @Column(name = "course_description", length = 512)
     private String description;
 
     @Column(name = "course_tags")

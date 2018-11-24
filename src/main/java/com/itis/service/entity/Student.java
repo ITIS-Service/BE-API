@@ -4,6 +4,8 @@ import com.itis.service.entity.enums.UserRole;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -33,6 +35,7 @@ public class Student extends User {
     @JoinTable(name = "students_and_suggested_courses",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "course_id"))
+    @LazyCollection(LazyCollectionOption.FALSE)
     private List<Course> suggestedCourses = new ArrayList<>();
 
     @ManyToMany(cascade = {
