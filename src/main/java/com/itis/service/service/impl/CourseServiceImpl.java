@@ -1,14 +1,11 @@
 package com.itis.service.service.impl;
 
+import com.itis.service.dto.CourseDetailsDto;
 import com.itis.service.dto.CreateCourseDto;
-import com.itis.service.entity.Course;
-import com.itis.service.entity.CourseDetails;
-import com.itis.service.entity.DayTime;
-import com.itis.service.entity.Teacher;
+import com.itis.service.entity.*;
 import com.itis.service.exception.ResourceNotFoundException;
-import com.itis.service.repository.CourseDetailsRepository;
-import com.itis.service.repository.CourseRepository;
-import com.itis.service.repository.TeacherRepository;
+import com.itis.service.mapper.CourseDetailsMapper;
+import com.itis.service.repository.*;
 import com.itis.service.service.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,15 +19,25 @@ public class CourseServiceImpl implements CourseService {
     private final CourseDetailsRepository courseDetailsRepository;
     private final CourseRepository courseRepository;
     private final TeacherRepository teacherRepository;
+    private final StudentRepository studentRepository;
+    private final UserCourseRepository userCourseRepository;
+
+    private final CourseDetailsMapper courseDetailsMapper;
 
     @Autowired
     public CourseServiceImpl(
             CourseDetailsRepository courseDetailsRepository,
             CourseRepository courseRepository,
-            TeacherRepository teacherRepository) {
+            TeacherRepository teacherRepository,
+            StudentRepository studentRepository,
+            UserCourseRepository userCourseRepository,
+            CourseDetailsMapper courseDetailsMapper) {
         this.courseDetailsRepository = courseDetailsRepository;
         this.courseRepository = courseRepository;
         this.teacherRepository = teacherRepository;
+        this.studentRepository = studentRepository;
+        this.userCourseRepository = userCourseRepository;
+        this.courseDetailsMapper = courseDetailsMapper;
     }
 
     public CourseDetails createCourse(CreateCourseDto createCourseDto) {
@@ -67,12 +74,26 @@ public class CourseServiceImpl implements CourseService {
         return courseDetails;
     }
 
-    public CourseDetails getDetails(long courseID) {
+    public CourseDetailsDto getDetails(long courseID, String email) {
+        Student student = studentRepository.findByEmail(email);
+        if (student == null) {
+            throw new ResourceNotFoundException(String.format("Студкет с email %s не найден", email));
+        }
+
         Course course = courseRepository.findById(courseID).orElseThrow(
                 () -> new ResourceNotFoundException(String.format("Курс с ID %d не найден", courseID))
         );
 
-        return course.getCourseDetails();
+        CourseDetails courseDetails = course.getCourseDetails();
+
+        CourseDetailsDto courseDetailsDto = courseDetailsMapper.courseDetailsToCourseDetailsDto(courseDetails);
+
+        UserCourse userCourse = userCourseRepository.findByUserAndCourseDetails(student, courseDetails);
+        if (userCourse != null) {
+            courseDetailsDto.setUserCourseStatus(userCourse.getStatus());
+        }
+
+        return courseDetailsDto;
     }
 
 }

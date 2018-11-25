@@ -1,8 +1,6 @@
 package com.itis.service.controller;
 
 import com.itis.service.dto.*;
-import com.itis.service.entity.CourseDetails;
-import com.itis.service.mapper.CourseDetailsMapper;
 import com.itis.service.security.SecurityConstants;
 import com.itis.service.service.CourseService;
 import com.itis.service.service.QuestionService;
@@ -16,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
 import java.util.*;
@@ -30,19 +29,16 @@ public class UserController {
     private final CourseService courseService;
 
     private final StudEmailaValidator studEmailaValidator;
-    private final CourseDetailsMapper courseDetailsMapper;
 
     @Autowired
     public UserController(UserService userService,
                           QuestionService questionService,
                           CourseService courseService,
-                          StudEmailaValidator studEmailaValidator,
-                          CourseDetailsMapper courseDetailsMapper) {
+                          StudEmailaValidator studEmailaValidator) {
         this.userService = userService;
         this.questionService = questionService;
         this.courseService = courseService;
         this.studEmailaValidator = studEmailaValidator;
-        this.courseDetailsMapper = courseDetailsMapper;
     }
 
     @ApiOperation(value = "Register new student with new password", response = ResponseDto.class)
@@ -79,9 +75,8 @@ public class UserController {
 
     @ApiOperation(value = "Get course details")
     @GetMapping("/courses/{courseID}/details")
-    public CourseDetailsDto getCourseDetails(@PathVariable long courseID) {
-        CourseDetails courseDetails = courseService.getDetails(courseID);
-        return courseDetailsMapper.courseDetailsToCourseDetailsDto(courseDetails);
+    public CourseDetailsDto getCourseDetails(@PathVariable long courseID, @ApiIgnore Authentication authentication) {
+        return courseService.getDetails(courseID, authentication.getName());
     }
 
 }
