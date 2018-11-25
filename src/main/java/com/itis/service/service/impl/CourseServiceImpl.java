@@ -47,7 +47,7 @@ public class CourseServiceImpl implements CourseService {
         );
 
         List<DayTime> dayTimes = createCourseDto.getDayTimes().stream()
-                .map(dayTime -> new DayTime(dayTime.getDay(), dayTime.getTime()))
+                .map(dayTime -> new DayTime(dayTime.getDay(), dayTime.getTimes()))
                 .collect(Collectors.toList());
 
         CourseDetails courseDetails = new CourseDetails(
