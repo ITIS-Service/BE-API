@@ -1,18 +1,17 @@
 package com.itis.service.service.impl;
 
 import com.itis.service.dto.CreateCourseDto;
-import com.itis.service.entity.Course;
-import com.itis.service.entity.CourseDetails;
-import com.itis.service.entity.DayTime;
-import com.itis.service.entity.Teacher;
+import com.itis.service.entity.*;
 import com.itis.service.exception.ResourceNotFoundException;
 import com.itis.service.repository.CourseDetailsRepository;
 import com.itis.service.repository.CourseRepository;
+import com.itis.service.repository.StudentRepository;
 import com.itis.service.repository.TeacherRepository;
 import com.itis.service.service.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,15 +21,18 @@ public class CourseServiceImpl implements CourseService {
     private final CourseDetailsRepository courseDetailsRepository;
     private final CourseRepository courseRepository;
     private final TeacherRepository teacherRepository;
+    private final StudentRepository studentRepository;
 
     @Autowired
     public CourseServiceImpl(
             CourseDetailsRepository courseDetailsRepository,
             CourseRepository courseRepository,
-            TeacherRepository teacherRepository) {
+            TeacherRepository teacherRepository,
+            StudentRepository studentRepository) {
         this.courseDetailsRepository = courseDetailsRepository;
         this.courseRepository = courseRepository;
         this.teacherRepository = teacherRepository;
+        this.studentRepository = studentRepository;
     }
 
     public CourseDetails createCourse(CreateCourseDto createCourseDto) {
@@ -65,6 +67,20 @@ public class CourseServiceImpl implements CourseService {
         courseDetailsRepository.flush();
 
         return courseDetails;
+    }
+
+    public List<List<Course>> fetch(String email) {
+        Student student = studentRepository.findByEmail(email);
+        if (student == null) {
+            throw new ResourceNotFoundException("Студент с почтой " + email + " не найден");
+        }
+
+        List<Course> suggestedCourses = student.getSuggestedCourses();
+        List<Course> allCourses = courseRepository.findByNumber(student.getGroup().getCourse());
+
+        allCourses.removeAll(suggestedCourses);
+
+        return Arrays.asList(suggestedCourses, allCourses);
     }
 
 }
