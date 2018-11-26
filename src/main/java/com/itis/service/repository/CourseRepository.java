@@ -12,4 +12,6 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     @Query("SELECT course FROM Course course JOIN course.tags tag WHERE tag = :tag AND course.number = :number")
     List<Course> findByTagAndNumber(@Param("tag") String tag, @Param("number") Integer number);
 
+    List<Course> findByNumber(Integer number);
+
 }

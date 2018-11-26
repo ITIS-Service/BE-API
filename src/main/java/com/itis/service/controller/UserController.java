@@ -1,6 +1,8 @@
 package com.itis.service.controller;
 
 import com.itis.service.dto.*;
+import com.itis.service.entity.Course;
+import com.itis.service.mapper.CourseMapper;
 import com.itis.service.security.SecurityConstants;
 import com.itis.service.service.CourseService;
 import com.itis.service.service.QuestionService;
@@ -24,11 +26,16 @@ import java.util.*;
 @Api(value = "users", description = "Operating with student actions")
 public class UserController {
 
+    private final static int SUGGESTED_COURSES_INDEX = 0;
+    private final static int ALL_COURSES_INDEX = 1;
+
     private final UserService userService;
     private final QuestionService questionService;
     private final CourseService courseService;
 
     private final StudEmailaValidator studEmailaValidator;
+
+    private final CourseMapper courseMapper;
 
     @Autowired
     public UserController(UserService userService,
@@ -39,6 +46,7 @@ public class UserController {
         this.questionService = questionService;
         this.courseService = courseService;
         this.studEmailaValidator = studEmailaValidator;
+        this.courseMapper = courseMapper;
     }
 
     @ApiOperation(value = "Register new student with new password", response = ResponseDto.class)
@@ -68,7 +76,8 @@ public class UserController {
 
     @ApiOperation(value = "Send selected answers", response = ResponseDto.class)
     @PostMapping("/answers")
-    public ResponseDto acceptAnswers(@RequestBody AcceptAnswersDto answersDto, Authentication authentication) {
+    public ResponseDto acceptAnswers(@RequestBody AcceptAnswersDto answersDto,
+                                     @ApiIgnore Authentication authentication) {
         questionService.acceptAnswers(answersDto.getAnswers(), authentication.getName());
         return new ResponseDto("Ответы успешно приняты", true);
     }

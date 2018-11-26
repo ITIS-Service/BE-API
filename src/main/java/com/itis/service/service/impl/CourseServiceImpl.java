@@ -6,10 +6,15 @@ import com.itis.service.entity.*;
 import com.itis.service.exception.ResourceNotFoundException;
 import com.itis.service.mapper.CourseDetailsMapper;
 import com.itis.service.repository.*;
+import com.itis.service.repository.CourseDetailsRepository;
+import com.itis.service.repository.CourseRepository;
+import com.itis.service.repository.StudentRepository;
+import com.itis.service.repository.TeacherRepository;
 import com.itis.service.service.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,7 +36,8 @@ public class CourseServiceImpl implements CourseService {
             TeacherRepository teacherRepository,
             StudentRepository studentRepository,
             UserCourseRepository userCourseRepository,
-            CourseDetailsMapper courseDetailsMapper) {
+            CourseDetailsMapper courseDetailsMapper,
+            StudentRepository studentRepository) {
         this.courseDetailsRepository = courseDetailsRepository;
         this.courseRepository = courseRepository;
         this.teacherRepository = teacherRepository;
@@ -94,6 +100,20 @@ public class CourseServiceImpl implements CourseService {
         }
 
         return courseDetailsDto;
+    }
+  
+    public List<List<Course>> fetch(String email) {
+        Student student = studentRepository.findByEmail(email);
+        if (student == null) {
+            throw new ResourceNotFoundException("Студент с почтой " + email + " не найден");
+        }
+
+        List<Course> suggestedCourses = student.getSuggestedCourses();
+        List<Course> allCourses = courseRepository.findByNumber(student.getGroup().getCourse());
+
+        allCourses.removeAll(suggestedCourses);
+
+        return Arrays.asList(suggestedCourses, allCourses);
     }
 
 }
