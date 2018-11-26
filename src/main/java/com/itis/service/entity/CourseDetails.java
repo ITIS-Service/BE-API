@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -27,12 +29,13 @@ public class CourseDetails {
     private Course course;
 
     @OneToMany(mappedBy = "courseDetails", cascade = CascadeType.ALL, orphanRemoval = true)
+    @LazyCollection(LazyCollectionOption.FALSE)
     private List<DayTime> dayTimes = new ArrayList<>();
 
     @Column(name = "course_place")
     private String place;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "teacher_id", nullable = false)
     private Teacher teacher;
 
@@ -50,6 +53,10 @@ public class CourseDetails {
         this.dayTimes = dayTimes;
         this.place = place;
         this.teacher = teacher;
+
+        for (DayTime dayTime : dayTimes) {
+            dayTime.setCourseDetails(this);
+        }
     }
 
     @Override

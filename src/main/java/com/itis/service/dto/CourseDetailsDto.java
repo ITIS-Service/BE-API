@@ -1,5 +1,7 @@
 package com.itis.service.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.itis.service.entity.enums.UserCourseStatus;
 import lombok.Data;
 
 import java.util.List;
@@ -14,5 +16,8 @@ public class CourseDetailsDto {
     private List<DayTimeDto> dayTimes;
     private String place;
     private TeacherDto teacher;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private UserCourseStatus userCourseStatus;
 
 }

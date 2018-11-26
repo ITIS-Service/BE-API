@@ -1,8 +1,6 @@
 package com.itis.service.controller;
 
 import com.itis.service.dto.*;
-import com.itis.service.entity.Course;
-import com.itis.service.mapper.CourseMapper;
 import com.itis.service.security.SecurityConstants;
 import com.itis.service.service.CourseService;
 import com.itis.service.service.QuestionService;
@@ -26,27 +24,21 @@ import java.util.*;
 @Api(value = "users", description = "Operating with student actions")
 public class UserController {
 
-    private final static int SUGGESTED_COURSES_INDEX = 0;
-    private final static int ALL_COURSES_INDEX = 1;
-
     private final UserService userService;
     private final QuestionService questionService;
     private final CourseService courseService;
-    private final StudEmailaValidator studEmailaValidator;
 
-    private final CourseMapper courseMapper;
+    private final StudEmailaValidator studEmailaValidator;
 
     @Autowired
     public UserController(UserService userService,
                           QuestionService questionService,
                           CourseService courseService,
-                          StudEmailaValidator studEmailaValidator,
-                          CourseMapper courseMapper) {
+                          StudEmailaValidator studEmailaValidator) {
         this.userService = userService;
         this.questionService = questionService;
         this.courseService = courseService;
         this.studEmailaValidator = studEmailaValidator;
-        this.courseMapper = courseMapper;
     }
 
     @ApiOperation(value = "Register new student with new password", response = ResponseDto.class)
@@ -82,15 +74,16 @@ public class UserController {
         return new ResponseDto("Ответы успешно приняты", true);
     }
 
+    @ApiOperation(value = "Get course details")
+    @GetMapping("/courses/{courseID}/details")
+    public CourseDetailsDto getCourseDetails(@PathVariable long courseID, @ApiIgnore Authentication authentication) {
+        return courseService.getDetails(courseID, authentication.getName());
+    }
+
     @ApiOperation(value = "Get suggested and all courses")
     @GetMapping("/courses")
     public ListCoursesDto getCourses(@ApiIgnore Authentication authentication) {
-        List<List<Course>> courses = courseService.fetch(authentication.getName());
-
-        return new ListCoursesDto(
-                courseMapper.courseListToCourseDtoList(courses.get(SUGGESTED_COURSES_INDEX)),
-                courseMapper.courseListToCourseDtoList(courses.get(ALL_COURSES_INDEX))
-        );
+        return courseService.fetch(authentication.getName());
     }
 
 }

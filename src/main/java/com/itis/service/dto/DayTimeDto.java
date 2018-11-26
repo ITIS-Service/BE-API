@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalTime;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -17,7 +18,7 @@ public class DayTimeDto {
     private Day day;
 
     @JsonFormat(pattern = "HH:mm")
-    @ApiModelProperty(dataType = "java.lang.String")
-    private LocalTime time;
+    @ApiModelProperty(dataType = "[Ljava.lang.String;")
+    private List<LocalTime> times;
 
 }

@@ -14,6 +14,7 @@ public class UserCourse {
 
     @Embeddable
     @AllArgsConstructor
+    @NoArgsConstructor
     @Data
     public static class UserCourseId implements Serializable {
 
