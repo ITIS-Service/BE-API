@@ -1,8 +1,6 @@
 package com.itis.service.controller;
 
 import com.itis.service.dto.*;
-import com.itis.service.entity.Course;
-import com.itis.service.mapper.CourseMapper;
 import com.itis.service.security.SecurityConstants;
 import com.itis.service.service.CourseService;
 import com.itis.service.service.QuestionService;
@@ -26,16 +24,11 @@ import java.util.*;
 @Api(value = "users", description = "Operating with student actions")
 public class UserController {
 
-    private final static int SUGGESTED_COURSES_INDEX = 0;
-    private final static int ALL_COURSES_INDEX = 1;
-
     private final UserService userService;
     private final QuestionService questionService;
     private final CourseService courseService;
 
     private final StudEmailaValidator studEmailaValidator;
-
-    private final CourseMapper courseMapper;
 
     @Autowired
     public UserController(UserService userService,
@@ -46,7 +39,6 @@ public class UserController {
         this.questionService = questionService;
         this.courseService = courseService;
         this.studEmailaValidator = studEmailaValidator;
-        this.courseMapper = courseMapper;
     }
 
     @ApiOperation(value = "Register new student with new password", response = ResponseDto.class)
@@ -86,6 +78,12 @@ public class UserController {
     @GetMapping("/courses/{courseID}/details")
     public CourseDetailsDto getCourseDetails(@PathVariable long courseID, @ApiIgnore Authentication authentication) {
         return courseService.getDetails(courseID, authentication.getName());
+    }
+
+    @ApiOperation(value = "Get suggested and all courses")
+    @GetMapping("/courses")
+    public ListCoursesDto getCourses(@ApiIgnore Authentication authentication) {
+        return courseService.fetch(authentication.getName());
     }
 
 }
