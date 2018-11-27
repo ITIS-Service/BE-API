@@ -1,6 +1,10 @@
 package com.itis.service.entity.enums;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.itis.service.exception.ResourceNotFoundException;
+
+import java.util.Arrays;
 
 public enum Day {
 
@@ -12,13 +16,17 @@ public enum Day {
         this.number = number;
     }
 
+    @JsonCreator
+    static Day fromValue(int value) {
+        return Arrays.stream(Day.values())
+                .filter(day -> day.number == value)
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("День с номером " + value + " не найден"));
+    }
+
     @JsonValue
     public int getNumber() {
         return number;
-    }
-
-    public void setNumber(int number) {
-        this.number = number;
     }
 
 }
