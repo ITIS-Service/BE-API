@@ -19,7 +19,7 @@ import java.util.List;
 public class Student extends User {
 
     @Column(name = "user_passed_quiz")
-    private boolean isPassedQuiz;
+    private boolean isPassedQuiz = false;
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "group_id")

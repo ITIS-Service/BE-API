@@ -36,7 +36,7 @@ public class AdminController {
     @PostMapping("/course")
     public CourseDetailsDto createCourse(@RequestBody CreateCourseDto createCourseDto) {
         CourseDetails courseDetails = courseService.createCourse(createCourseDto);
-        return courseDetailsMapper.courseDetailsToCourseDetailsDto(courseDetails);
+        return courseDetailsMapper.courseDetailsToCourseDetailsDto(courseDetails, null);
     }
 
     @ApiOperation(value = "Create new teacher", response = TeacherDto.class)

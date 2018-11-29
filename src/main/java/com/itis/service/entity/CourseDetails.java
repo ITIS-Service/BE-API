@@ -39,7 +39,7 @@ public class CourseDetails {
     @JoinColumn(name = "teacher_id", nullable = false)
     private Teacher teacher;
 
-    @OneToMany(mappedBy = "courseDetails", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "courseDetails", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<UserCourse> userCourses = new ArrayList<>();
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "courseDetails", orphanRemoval = true)

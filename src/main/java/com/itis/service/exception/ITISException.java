@@ -10,7 +10,7 @@ import lombok.EqualsAndHashCode;
 @AllArgsConstructor
 public abstract class ITISException extends RuntimeException {
 
-    private String message;
-    private ErrorCode code;
+    protected String message;
+    protected ErrorCode code;
 
 }
