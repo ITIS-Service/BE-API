@@ -1,13 +1,12 @@
 package com.itis.service.service.impl;
 
-import com.itis.service.dto.CourseDetailsDto;
-import com.itis.service.dto.CreateCourseDto;
-import com.itis.service.dto.ListCoursesDto;
+import com.itis.service.dto.*;
 import com.itis.service.entity.*;
 import com.itis.service.exception.ResourceNotFoundException;
 import com.itis.service.exception.SignUpCourseException;
 import com.itis.service.mapper.CourseDetailsMapper;
 import com.itis.service.mapper.CourseMapper;
+import com.itis.service.mapper.UserCourseMapper;
 import com.itis.service.repository.CourseDetailsRepository;
 import com.itis.service.repository.CourseRepository;
 import com.itis.service.repository.StudentRepository;
@@ -32,6 +31,7 @@ public class CourseServiceImpl implements CourseService {
 
     private final CourseDetailsMapper courseDetailsMapper;
     private final CourseMapper courseMapper;
+    private final UserCourseMapper userCourseMapper;
 
     @Autowired
     public CourseServiceImpl(
@@ -40,13 +40,15 @@ public class CourseServiceImpl implements CourseService {
             TeacherRepository teacherRepository,
             StudentRepository studentRepository,
             CourseDetailsMapper courseDetailsMapper,
-            CourseMapper courseMapper) {
+            CourseMapper courseMapper,
+            UserCourseMapper userCourseMapper) {
         this.courseDetailsRepository = courseDetailsRepository;
         this.courseRepository = courseRepository;
         this.teacherRepository = teacherRepository;
         this.studentRepository = studentRepository;
         this.courseDetailsMapper = courseDetailsMapper;
         this.courseMapper = courseMapper;
+        this.userCourseMapper = userCourseMapper;
     }
 
     public CourseDetails createCourse(CreateCourseDto createCourseDto) {
@@ -145,6 +147,18 @@ public class CourseServiceImpl implements CourseService {
         courseDetailsRepository.saveAndFlush(courseDetails);
 
         return courseDetailsMapper.courseDetailsToCourseDetailsDto(courseDetails, student);
+    }
+
+    @Transactional
+    public List<UserCourseDto> fetchMyCourses(String email) {
+        Student student = studentRepository.findByEmail(email);
+        if (student == null) {
+            throw new ResourceNotFoundException("Студент с почтой " + email + " не найден");
+        }
+
+        List<UserCourse> userCourses = student.getUserCourses();
+
+        return userCourseMapper.userCourseDtoList(userCourses);
     }
 
 }
