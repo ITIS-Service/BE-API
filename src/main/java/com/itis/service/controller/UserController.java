@@ -86,4 +86,10 @@ public class UserController {
         return courseService.fetch(authentication.getName());
     }
 
+    @ApiOperation(value = "Sign up to selected course")
+    @PostMapping("/courses/{courseID}/signUp")
+    public CourseDetailsDto signUpCourse(@PathVariable long courseID, @ApiIgnore Authentication authentication) {
+        return courseService.signUp(courseID, authentication.getName());
+    }
+
 }

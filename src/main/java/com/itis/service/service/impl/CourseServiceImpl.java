@@ -5,9 +5,9 @@ import com.itis.service.dto.CreateCourseDto;
 import com.itis.service.dto.ListCoursesDto;
 import com.itis.service.entity.*;
 import com.itis.service.exception.ResourceNotFoundException;
+import com.itis.service.exception.SignUpCourseException;
 import com.itis.service.mapper.CourseDetailsMapper;
 import com.itis.service.mapper.CourseMapper;
-import com.itis.service.repository.*;
 import com.itis.service.repository.CourseDetailsRepository;
 import com.itis.service.repository.CourseRepository;
 import com.itis.service.repository.StudentRepository;
@@ -15,6 +15,7 @@ import com.itis.service.repository.TeacherRepository;
 import com.itis.service.service.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,11 +23,12 @@ import java.util.stream.Collectors;
 @Service
 public class CourseServiceImpl implements CourseService {
 
+    private static final int COURSE_LIMIT_COUNT = 2;
+
     private final CourseDetailsRepository courseDetailsRepository;
     private final CourseRepository courseRepository;
     private final TeacherRepository teacherRepository;
     private final StudentRepository studentRepository;
-    private final UserCourseRepository userCourseRepository;
 
     private final CourseDetailsMapper courseDetailsMapper;
     private final CourseMapper courseMapper;
@@ -37,14 +39,12 @@ public class CourseServiceImpl implements CourseService {
             CourseRepository courseRepository,
             TeacherRepository teacherRepository,
             StudentRepository studentRepository,
-            UserCourseRepository userCourseRepository,
             CourseDetailsMapper courseDetailsMapper,
             CourseMapper courseMapper) {
         this.courseDetailsRepository = courseDetailsRepository;
         this.courseRepository = courseRepository;
         this.teacherRepository = teacherRepository;
         this.studentRepository = studentRepository;
-        this.userCourseRepository = userCourseRepository;
         this.courseDetailsMapper = courseDetailsMapper;
         this.courseMapper = courseMapper;
     }
@@ -83,10 +83,11 @@ public class CourseServiceImpl implements CourseService {
         return courseDetails;
     }
 
+    @Transactional
     public CourseDetailsDto getDetails(long courseID, String email) {
         Student student = studentRepository.findByEmail(email);
         if (student == null) {
-            throw new ResourceNotFoundException(String.format("Студкет с email %s не найден", email));
+            throw new ResourceNotFoundException(String.format("Студент с email %s не найден", email));
         }
 
         Course course = courseRepository.findById(courseID).orElseThrow(
@@ -95,14 +96,7 @@ public class CourseServiceImpl implements CourseService {
 
         CourseDetails courseDetails = course.getCourseDetails();
 
-        CourseDetailsDto courseDetailsDto = courseDetailsMapper.courseDetailsToCourseDetailsDto(courseDetails);
-
-        UserCourse userCourse = userCourseRepository.findByUserAndCourseDetails(student, courseDetails);
-        if (userCourse != null) {
-            courseDetailsDto.setUserCourseStatus(userCourse.getStatus());
-        }
-
-        return courseDetailsDto;
+        return courseDetailsMapper.courseDetailsToCourseDetailsDto(courseDetails, student);
     }
   
     public ListCoursesDto fetch(String email) {
@@ -122,6 +116,35 @@ public class CourseServiceImpl implements CourseService {
                 courseMapper.courseListToCourseDtoList(suggestedCourses),
                 courseMapper.courseListToCourseDtoList(allCourses)
         );
+    }
+
+    @Transactional
+    public CourseDetailsDto signUp(long courseID, String email) {
+        Student student = studentRepository.findByEmail(email);
+        if (student == null) {
+            throw new ResourceNotFoundException("Студент с почтой " + email + " не найден");
+        }
+
+        Course course = courseRepository.findById(courseID).orElseThrow(
+                () -> new ResourceNotFoundException(String.format("Курс с ID %d не найден", courseID))
+        );
+
+        CourseDetails courseDetails = course.getCourseDetails();
+
+        if (courseDetails.getUserCourses().stream().anyMatch(userCourse -> userCourse.getUser().equals(student))) {
+            throw new SignUpCourseException();
+        }
+
+        if (student.getUserCourses().size() == COURSE_LIMIT_COUNT) {
+            throw new SignUpCourseException(true);
+        }
+
+        UserCourse userCourse = new UserCourse(student, courseDetails);
+        courseDetails.getUserCourses().add(userCourse);
+
+        courseDetailsRepository.saveAndFlush(courseDetails);
+
+        return courseDetailsMapper.courseDetailsToCourseDetailsDto(courseDetails, student);
     }
 
 }

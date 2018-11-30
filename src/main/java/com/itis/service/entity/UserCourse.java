@@ -40,4 +40,10 @@ public class UserCourse {
     @Column(name = "status")
     private UserCourseStatus status;
 
+    public UserCourse(User user, CourseDetails courseDetails) {
+        this.id = new UserCourseId(user.getId(), courseDetails.getId());
+        this.user = user;
+        this.courseDetails = courseDetails;
+        this.status = UserCourseStatus.WAITING;
+    }
 }
