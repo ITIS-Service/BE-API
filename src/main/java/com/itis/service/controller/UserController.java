@@ -92,10 +92,4 @@ public class UserController {
         return courseService.signUp(courseID, authentication.getName());
     }
 
-    @ApiOperation(value = "Get student courses")
-    @GetMapping("/courses/my")
-    public List<UserCourseDto> getMyCourses(@ApiIgnore Authentication authentication) {
-        return courseService.fetchMyCourses(authentication.getName());
-    }
-
 }
