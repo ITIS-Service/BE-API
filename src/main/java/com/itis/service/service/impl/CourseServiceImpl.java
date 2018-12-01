@@ -1,8 +1,6 @@
 package com.itis.service.service.impl;
 
-import com.itis.service.dto.CourseDetailsDto;
-import com.itis.service.dto.CreateCourseDto;
-import com.itis.service.dto.ListCoursesDto;
+import com.itis.service.dto.*;
 import com.itis.service.entity.*;
 import com.itis.service.exception.ResourceNotFoundException;
 import com.itis.service.exception.SignUpCourseException;
@@ -98,7 +96,8 @@ public class CourseServiceImpl implements CourseService {
 
         return courseDetailsMapper.courseDetailsToCourseDetailsDto(courseDetails, student);
     }
-  
+
+    @Transactional
     public ListCoursesDto fetch(String email) {
         Student student = studentRepository.findByEmail(email);
         if (student == null) {
@@ -107,12 +106,17 @@ public class CourseServiceImpl implements CourseService {
 
         List<Course> suggestedCourses = student.getSuggestedCourses();
         List<Course> allCourses = courseRepository.findByNumber(student.getGroup().getCourse());
+        List<Course> userCourses = student.getUserCourses().stream()
+                .map(userCourse -> userCourse.getCourseDetails().getCourse())
+                .collect(Collectors.toList());
 
         allCourses.removeAll(suggestedCourses);
+        allCourses.removeAll(userCourses);
 
-
+        suggestedCourses.removeAll(userCourses);
 
         return new ListCoursesDto(
+                courseMapper.courseListToCourseDtoList(userCourses),
                 courseMapper.courseListToCourseDtoList(suggestedCourses),
                 courseMapper.courseListToCourseDtoList(allCourses)
         );

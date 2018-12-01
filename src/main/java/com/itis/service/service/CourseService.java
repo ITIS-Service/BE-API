@@ -1,8 +1,6 @@
 package com.itis.service.service;
 
-import com.itis.service.dto.CourseDetailsDto;
-import com.itis.service.dto.CreateCourseDto;
-import com.itis.service.dto.ListCoursesDto;
+import com.itis.service.dto.*;
 import com.itis.service.entity.CourseDetails;
 
 public interface CourseService {

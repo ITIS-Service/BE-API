@@ -11,6 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 public class ListCoursesDto {
 
+    private List<CourseDto> userCourses;
     private List<CourseDto> suggestedCourses;
     private List<CourseDto> allCourses;
 
