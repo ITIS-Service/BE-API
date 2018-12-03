@@ -3,6 +3,7 @@ package com.itis.service.controller;
 import com.itis.service.dto.*;
 import com.itis.service.security.SecurityConstants;
 import com.itis.service.service.CourseService;
+import com.itis.service.service.PointService;
 import com.itis.service.service.QuestionService;
 import com.itis.service.service.UserService;
 import com.itis.service.validators.StudEmailaValidator;
@@ -27,6 +28,7 @@ public class UserController {
     private final UserService userService;
     private final QuestionService questionService;
     private final CourseService courseService;
+    private final PointService pointService;
 
     private final StudEmailaValidator studEmailaValidator;
 
@@ -34,10 +36,12 @@ public class UserController {
     public UserController(UserService userService,
                           QuestionService questionService,
                           CourseService courseService,
+                          PointService pointService,
                           StudEmailaValidator studEmailaValidator) {
         this.userService = userService;
         this.questionService = questionService;
         this.courseService = courseService;
+        this.pointService = pointService;
         this.studEmailaValidator = studEmailaValidator;
     }
 
@@ -90,6 +94,12 @@ public class UserController {
     @PostMapping("/courses/{courseID}/signUp")
     public CourseDetailsDto signUpCourse(@PathVariable long courseID, @ApiIgnore Authentication authentication) {
         return courseService.signUp(courseID, authentication.getName());
+    }
+
+    @ApiOperation(value = "Get points at selected course")
+    @GetMapping("/courses/{courseID}/points")
+    public UserPointsDto getPoints(@PathVariable long courseID, @ApiIgnore Authentication authentication) {
+        return pointService.fetchPoints(courseID, authentication.getName());
     }
 
 }

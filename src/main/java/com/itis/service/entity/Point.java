@@ -38,6 +38,13 @@ public class Point {
     @ManyToMany(mappedBy = "points")
     private List<Student> users = new ArrayList<>();
 
+    public Point(String title, String description, Integer count, CourseDetails courseDetails) {
+        this.title = title;
+        this.description = description;
+        this.count = count;
+        this.courseDetails = courseDetails;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

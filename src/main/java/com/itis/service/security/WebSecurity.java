@@ -7,7 +7,6 @@ import com.itis.service.entity.enums.UserRole;
 import com.itis.service.service.impl.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -32,7 +31,11 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
             "/swagger-resources/**",
             "/swagger-ui.html",
             "/v2/api-docs",
-            "/webjars/**"
+            "/webjars/**",
+
+            // -- Registration endpoints --- //
+            "/users/registration",
+            "/teacher/registration"
     };
 
     @Autowired
@@ -45,9 +48,9 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.cors().and().csrf().disable().authorizeRequests()
                 .antMatchers(AUTH_WHITELIST).permitAll()
-                .antMatchers(HttpMethod.POST, SecurityConstants.SIGN_UP_URL).permitAll()
                 .antMatchers("/users/**").hasRole("STUDENT")
                 .antMatchers("/admin/**").hasRole("ADMIN")
+                .antMatchers("/teacher/**").hasRole("TEACHER")
                 .anyRequest().authenticated()
                 .and()
                 .addFilter(jwtAuthenticationFilter())
