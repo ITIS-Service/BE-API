@@ -29,8 +29,7 @@ public class Student extends User {
     private List<UserCourse> userCourses = new ArrayList<>();
 
     @ManyToMany(cascade = {
-            CascadeType.PERSIST,
-            CascadeType.MERGE
+            CascadeType.PERSIST
     })
     @JoinTable(name = "students_and_suggested_courses",
             joinColumns = @JoinColumn(name = "user_id"),
