@@ -96,6 +96,12 @@ public class UserController {
         return courseService.signUp(courseID, authentication.getName());
     }
 
+    @ApiOperation(value = "Sign out from selected course")
+    @PostMapping("/courses/{courseID}/signOut")
+    public CourseDetailsDto signOutCourse(@PathVariable long courseID, @ApiIgnore Authentication authentication) {
+        return courseService.signOut(courseID, authentication.getName());
+    }
+
     @ApiOperation(value = "Get points at selected course")
     @GetMapping("/courses/{courseID}/points")
     public UserPointsDto getPoints(@PathVariable long courseID, @ApiIgnore Authentication authentication) {
