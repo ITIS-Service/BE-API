@@ -2,14 +2,13 @@ package com.itis.service.service.impl;
 
 import com.itis.service.dto.*;
 import com.itis.service.entity.*;
+import com.itis.service.entity.enums.UserCourseStatus;
 import com.itis.service.exception.ResourceNotFoundException;
+import com.itis.service.exception.SignOutCourseException;
 import com.itis.service.exception.SignUpCourseException;
 import com.itis.service.mapper.CourseDetailsMapper;
 import com.itis.service.mapper.CourseMapper;
-import com.itis.service.repository.CourseDetailsRepository;
-import com.itis.service.repository.CourseRepository;
-import com.itis.service.repository.StudentRepository;
-import com.itis.service.repository.TeacherRepository;
+import com.itis.service.repository.*;
 import com.itis.service.service.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,6 +26,7 @@ public class CourseServiceImpl implements CourseService {
     private final CourseRepository courseRepository;
     private final TeacherRepository teacherRepository;
     private final StudentRepository studentRepository;
+    private final UserCourseRepository userCourseRepository;
 
     private final CourseDetailsMapper courseDetailsMapper;
     private final CourseMapper courseMapper;
@@ -37,12 +37,14 @@ public class CourseServiceImpl implements CourseService {
             CourseRepository courseRepository,
             TeacherRepository teacherRepository,
             StudentRepository studentRepository,
+            UserCourseRepository userCourseRepository,
             CourseDetailsMapper courseDetailsMapper,
             CourseMapper courseMapper) {
         this.courseDetailsRepository = courseDetailsRepository;
         this.courseRepository = courseRepository;
         this.teacherRepository = teacherRepository;
         this.studentRepository = studentRepository;
+        this.userCourseRepository = userCourseRepository;
         this.courseDetailsMapper = courseDetailsMapper;
         this.courseMapper = courseMapper;
     }
@@ -145,6 +147,35 @@ public class CourseServiceImpl implements CourseService {
 
         UserCourse userCourse = new UserCourse(student, courseDetails);
         courseDetails.getUserCourses().add(userCourse);
+
+        courseDetailsRepository.saveAndFlush(courseDetails);
+
+        return courseDetailsMapper.courseDetailsToCourseDetailsDto(courseDetails, student);
+    }
+
+    @Transactional
+    public CourseDetailsDto signOut(long courseID, String email) {
+        Student student = studentRepository.findByEmail(email);
+        if (student == null) {
+            throw new ResourceNotFoundException("Студент с почтой " + email + " не найден");
+        }
+
+        Course course = courseRepository.findById(courseID).orElseThrow(
+                () -> new ResourceNotFoundException(String.format("Курс с ID %d не найден", courseID))
+        );
+
+        UserCourse userCourse = userCourseRepository.findByUserAndCourseDetails(student, course.getCourseDetails()).orElseThrow(
+                () -> new ResourceNotFoundException("Вы не записаны на данный курс")
+        );
+
+        if (userCourse.getStatus() != UserCourseStatus.WAITING) {
+            throw new SignOutCourseException();
+        }
+
+        CourseDetails courseDetails = course.getCourseDetails();
+
+        student.getUserCourses().remove(userCourse);
+        courseDetails.getUserCourses().remove(userCourse);
 
         courseDetailsRepository.saveAndFlush(courseDetails);
 

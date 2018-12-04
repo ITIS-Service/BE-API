@@ -9,5 +9,6 @@ public interface CourseService {
     CourseDetailsDto getDetails(long courseID, String email);
     ListCoursesDto fetch(String email);
     CourseDetailsDto signUp(long courseID, String email);
+    CourseDetailsDto signOut(long courseID, String email);
 
 }
