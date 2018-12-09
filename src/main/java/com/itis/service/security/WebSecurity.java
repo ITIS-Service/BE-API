@@ -1,9 +1,10 @@
 package com.itis.service.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.itis.service.dto.LoginResponseDto;
+import com.itis.service.dto.ProfileDto;
 import com.itis.service.entity.Student;
 import com.itis.service.entity.enums.UserRole;
+import com.itis.service.mapper.StudentMapper;
 import com.itis.service.service.impl.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -25,6 +26,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 
     private UserDetailsServiceImpl userDetailsService;
     private PasswordEncoder passwordEncoder;
+    private StudentMapper studentMapper;
 
     private static final String[] AUTH_WHITELIST = {
             // -- Swagger UI --- //
@@ -39,9 +41,13 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
     };
 
     @Autowired
-    public WebSecurity(UserDetailsServiceImpl userDetailsService, PasswordEncoder passwordEncoder) {
+    public WebSecurity(
+            UserDetailsServiceImpl userDetailsService,
+            PasswordEncoder passwordEncoder,
+            StudentMapper studentMapper) {
         this.userDetailsService = userDetailsService;
         this.passwordEncoder = passwordEncoder;
+        this.studentMapper = studentMapper;
     }
 
     @Override
@@ -100,14 +106,12 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
             if (userPrincipal.getUser().getRole() == UserRole.STUDENT) {
                 Student student = (Student) userPrincipal.getUser();
 
-                LoginResponseDto loginResponse = LoginResponseDto.builder()
-                        .isPassedQuiz(student.isPassedQuiz())
-                        .build();
+                ProfileDto profileDto = studentMapper.profileDto(student);
 
                 response.setContentType("application/json; charset=UTF-8");
                 response.setCharacterEncoding("UTF-8");
                 PrintWriter out = response.getWriter();
-                out.println(objectMapper.writeValueAsString(loginResponse));
+                out.println(objectMapper.writeValueAsString(profileDto));
             }
         };
     }
