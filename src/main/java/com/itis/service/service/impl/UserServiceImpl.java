@@ -1,5 +1,6 @@
 package com.itis.service.service.impl;
 
+import com.itis.service.dto.ProfileDto;
 import com.itis.service.dto.RegisterDto;
 import com.itis.service.entity.Group;
 import com.itis.service.entity.Student;
@@ -8,6 +9,7 @@ import com.itis.service.entity.enums.UserRole;
 import com.itis.service.exception.InitializeException;
 import com.itis.service.exception.RegistrationException;
 import com.itis.service.exception.ResourceNotFoundException;
+import com.itis.service.mapper.StudentMapper;
 import com.itis.service.repository.GroupRepository;
 import com.itis.service.repository.StudentRepository;
 import com.itis.service.repository.UserRepository;
@@ -39,17 +41,21 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final JWTProvider jwtProvider;
 
+    private final StudentMapper studentMapper;
+
     @Autowired
     public UserServiceImpl(GroupRepository groupRepository,
                            StudentRepository studentRepository,
                            UserRepository userRepository,
                            PasswordEncoder passwordEncoder,
-                           JWTProvider jwtProvider) {
+                           JWTProvider jwtProvider,
+                           StudentMapper studentMapper) {
         this.groupRepository = groupRepository;
         this.studentRepository = studentRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtProvider = jwtProvider;
+        this.studentMapper = studentMapper;
     }
 
     public String register(RegisterDto registerDto) {
@@ -65,6 +71,15 @@ public class UserServiceImpl implements UserService {
         studentRepository.save(student);
 
         return jwtProvider.createToken(student.getRole().toString(), student.getEmail());
+    }
+
+    public ProfileDto fetchProfile(String email) {
+        Student student = studentRepository.findByEmail(email);
+        if (student == null) {
+            throw new ResourceNotFoundException("Пользователь с e-mail" + email + " не найден");
+        }
+
+        return studentMapper.profileDto(student);
     }
 
     public void updateStudentList() {

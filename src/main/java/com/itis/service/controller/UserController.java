@@ -45,9 +45,9 @@ public class UserController {
         this.studEmailaValidator = studEmailaValidator;
     }
 
-    @ApiOperation(value = "Register new student with new password", response = ResponseDto.class)
+    @ApiOperation(value = "Register new student with new password", response = ProfileDto.class)
     @PostMapping("/registration")
-    public ResponseEntity<ResponseDto> register(@Valid @RequestBody RegisterDto registerDto, Errors errors) {
+    public ResponseEntity<Object> register(@Valid @RequestBody RegisterDto registerDto, Errors errors) {
         studEmailaValidator.validate(registerDto, errors);
         if (errors.hasErrors()) {
             return ResponseEntity
@@ -61,7 +61,7 @@ public class UserController {
 
         return ResponseEntity.ok()
                 .headers(headers)
-                .body(new ResponseDto("Пароль установлен", true));
+                .body(userService.fetchProfile(registerDto.getEmail()));
     }
 
     @ApiOperation(value = "Get all questions", response = QuestionDto[].class)
