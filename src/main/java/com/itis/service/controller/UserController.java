@@ -108,4 +108,13 @@ public class UserController {
         return pointService.fetchPoints(courseID, authentication.getName());
     }
 
+    @ApiOperation(value = "Change user password")
+    @PostMapping("/profile/password/change")
+    public ResponseDto changePassword(
+            @RequestBody ChangePasswordDto changePasswordDto,
+            @ApiIgnore Authentication authentication) {
+        userService.changePassword(changePasswordDto, authentication.getName());
+        return new ResponseDto("Пароль успешно изменен", true);
+    }
+
 }

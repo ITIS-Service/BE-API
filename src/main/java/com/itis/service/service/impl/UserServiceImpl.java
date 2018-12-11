@@ -1,11 +1,13 @@
 package com.itis.service.service.impl;
 
+import com.itis.service.dto.ChangePasswordDto;
 import com.itis.service.dto.ProfileDto;
 import com.itis.service.dto.RegisterDto;
 import com.itis.service.entity.Group;
 import com.itis.service.entity.Student;
 import com.itis.service.entity.User;
 import com.itis.service.entity.enums.UserRole;
+import com.itis.service.exception.AccountException;
 import com.itis.service.exception.InitializeException;
 import com.itis.service.exception.RegistrationException;
 import com.itis.service.exception.ResourceNotFoundException;
@@ -80,6 +82,23 @@ public class UserServiceImpl implements UserService {
         }
 
         return studentMapper.profileDto(student);
+    }
+
+    public void changePassword(ChangePasswordDto changePasswordDto, String email) {
+        Student student = studentRepository.findByEmail(email);
+        if (student == null) {
+            throw new ResourceNotFoundException("Пользователь с e-mail" + email + " не найден");
+        }
+
+
+        if (passwordEncoder.matches(changePasswordDto.getOldPassword(), student.getPassword())) {
+            String encodedNewPassword = passwordEncoder.encode(changePasswordDto.getNewPassword());
+
+            student.setPassword(encodedNewPassword);
+            studentRepository.saveAndFlush(student);
+        } else {
+            throw new AccountException();
+        }
     }
 
     public void updateStudentList() {
