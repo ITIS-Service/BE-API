@@ -46,6 +46,9 @@ public class Student extends User {
             inverseJoinColumns = @JoinColumn(name = "point_id"))
     private List<Point> points = new ArrayList<>();
 
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Device> devices = new ArrayList<>();
+
     public Student(String email, String password, String firstName, String lastName, Group group) {
         super(email, password, firstName, lastName, UserRole.STUDENT);
         this.group = group;

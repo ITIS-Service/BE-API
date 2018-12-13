@@ -2,10 +2,7 @@ package com.itis.service.controller;
 
 import com.itis.service.dto.*;
 import com.itis.service.security.SecurityConstants;
-import com.itis.service.service.CourseService;
-import com.itis.service.service.PointService;
-import com.itis.service.service.QuestionService;
-import com.itis.service.service.UserService;
+import com.itis.service.service.*;
 import com.itis.service.validators.StudEmailaValidator;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -29,6 +26,7 @@ public class UserController {
     private final QuestionService questionService;
     private final CourseService courseService;
     private final PointService pointService;
+    private final DeviceService deviceService;
 
     private final StudEmailaValidator studEmailaValidator;
 
@@ -37,11 +35,13 @@ public class UserController {
                           QuestionService questionService,
                           CourseService courseService,
                           PointService pointService,
+                          DeviceService deviceService,
                           StudEmailaValidator studEmailaValidator) {
         this.userService = userService;
         this.questionService = questionService;
         this.courseService = courseService;
         this.pointService = pointService;
+        this.deviceService = deviceService;
         this.studEmailaValidator = studEmailaValidator;
     }
 
@@ -115,6 +115,21 @@ public class UserController {
             @ApiIgnore Authentication authentication) {
         userService.changePassword(changePasswordDto, authentication.getName());
         return new ResponseDto("Пароль успешно изменен", true);
+    }
+
+    @ApiOperation(value = "Register device")
+    @PostMapping("/device/register")
+    public ResponseDto registerDevice(
+            @RequestBody RegisterDeviceDto registerDeviceDto,
+            @ApiIgnore Authentication authentication) {
+        deviceService.registerDevice(registerDeviceDto, authentication.getName());
+        return new ResponseDto("Устройство успешно зарегестрировано", true);
+    }
+
+    @PostMapping("/device/unregister")
+    public ResponseDto unregisterDevice(@RequestBody UnregisterDeviceDto unregisterDeviceDto) {
+        deviceService.unregisterDevice(unregisterDeviceDto);
+        return new ResponseDto("Устройство успешно удалено", true);
     }
 
 }
