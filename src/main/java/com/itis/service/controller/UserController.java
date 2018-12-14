@@ -117,7 +117,7 @@ public class UserController {
         return new ResponseDto("Пароль успешно изменен", true);
     }
 
-    @ApiOperation(value = "Register device")
+    @ApiOperation(value = "Register device for push notifications")
     @PostMapping("/device/register")
     public ResponseDto registerDevice(
             @RequestBody RegisterDeviceDto registerDeviceDto,
@@ -126,6 +126,7 @@ public class UserController {
         return new ResponseDto("Устройство успешно зарегестрировано", true);
     }
 
+    @ApiOperation(value = "Unregister device from push notifications")
     @PostMapping("/device/unregister")
     public ResponseDto unregisterDevice(@RequestBody UnregisterDeviceDto unregisterDeviceDto) {
         deviceService.unregisterDevice(unregisterDeviceDto);
