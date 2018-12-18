@@ -1,9 +1,6 @@
 package com.itis.service.controller;
 
-import com.itis.service.dto.CourseDetailsDto;
-import com.itis.service.dto.CreateCourseDto;
-import com.itis.service.dto.CreateTeacherDto;
-import com.itis.service.dto.TeacherDto;
+import com.itis.service.dto.*;
 import com.itis.service.entity.CourseDetails;
 import com.itis.service.mapper.CourseDetailsMapper;
 import com.itis.service.service.CourseService;
@@ -43,6 +40,13 @@ public class AdminController {
     @PostMapping("/teacher")
     public TeacherDto teacher(@RequestBody CreateTeacherDto teacherDto) {
         return teacherService.create(teacherDto);
+    }
+
+    @ApiOperation(value = "Change students status on course")
+    @PostMapping("/course/{courseID}/students/status")
+    public ResponseDto acceptStudents(@PathVariable Long courseID, @RequestBody StudentListDto studentListDto) {
+        courseService.updateStudentsStatus(studentListDto, courseID);
+        return new ResponseDto("Статусы успешно обновлены", true);
     }
 
 }

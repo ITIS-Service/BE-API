@@ -10,6 +10,7 @@ import com.itis.service.mapper.CourseDetailsMapper;
 import com.itis.service.mapper.CourseMapper;
 import com.itis.service.repository.*;
 import com.itis.service.service.CourseService;
+import com.itis.service.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +32,8 @@ public class CourseServiceImpl implements CourseService {
     private final CourseDetailsMapper courseDetailsMapper;
     private final CourseMapper courseMapper;
 
+    private final NotificationService notificationService;
+
     @Autowired
     public CourseServiceImpl(
             CourseDetailsRepository courseDetailsRepository,
@@ -39,7 +42,7 @@ public class CourseServiceImpl implements CourseService {
             StudentRepository studentRepository,
             UserCourseRepository userCourseRepository,
             CourseDetailsMapper courseDetailsMapper,
-            CourseMapper courseMapper) {
+            CourseMapper courseMapper, NotificationService notificationService) {
         this.courseDetailsRepository = courseDetailsRepository;
         this.courseRepository = courseRepository;
         this.teacherRepository = teacherRepository;
@@ -47,6 +50,7 @@ public class CourseServiceImpl implements CourseService {
         this.userCourseRepository = userCourseRepository;
         this.courseDetailsMapper = courseDetailsMapper;
         this.courseMapper = courseMapper;
+        this.notificationService = notificationService;
     }
 
     public CourseDetails createCourse(CreateCourseDto createCourseDto) {
@@ -180,6 +184,34 @@ public class CourseServiceImpl implements CourseService {
         courseDetailsRepository.saveAndFlush(courseDetails);
 
         return courseDetailsMapper.courseDetailsToCourseDetailsDto(courseDetails, student);
+    }
+
+    @Transactional
+    public void updateStudentsStatus(StudentListDto studentListDto, Long courseID) {
+        Course course = courseRepository.findById(courseID).orElseThrow(
+                () -> new ResourceNotFoundException(String.format("Курс с ID %d не найден", courseID))
+        );
+
+        for (Long studentID : studentListDto.getStudentIDs()) {
+            Student student = studentRepository.findById(studentID).orElseThrow(
+                    () -> new ResourceNotFoundException("Студент с ID " + studentID + " не найден")
+            );
+
+            UserCourse userCourse = userCourseRepository.findByUserAndCourseDetails(student, course.getCourseDetails()).orElseThrow(
+                    () -> new ResourceNotFoundException(String.format("Студет %s %s не записан на курс", student.getLastName(), student.getFirstName()))
+            );
+
+            userCourse.setStatus(studentListDto.getStatus());
+            userCourseRepository.save(userCourse);
+
+            notificationService.sendCourseStatusChanged(
+                    student,
+                    userCourse.getCourseDetails().getCourse(),
+                    studentListDto.getStatus()
+            );
+        }
+
+        userCourseRepository.flush();
     }
 
 }
