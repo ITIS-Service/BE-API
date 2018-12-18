@@ -1,5 +1,6 @@
 package com.itis.service.entity;
 
+import com.itis.service.entity.enums.DeviceType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -28,6 +29,9 @@ public class Device {
 
     @Column(name = "device_token", unique = true)
     private String token;
+
+    @Column(name = "device_type")
+    private DeviceType type;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id")

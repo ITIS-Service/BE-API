@@ -11,4 +11,6 @@ public interface CourseService {
     CourseDetailsDto signUp(long courseID, String email);
     CourseDetailsDto signOut(long courseID, String email);
 
+    void updateStudentsStatus(StudentListDto studentListDto, Long courseID);
+
 }
