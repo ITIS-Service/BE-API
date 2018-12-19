@@ -33,7 +33,7 @@ public class AndroidNotificationManager implements NotificationManager {
 
         message.put("title", notificationDto.getTitle());
         message.put("body", notificationDto.getBody());
-        message.put("notificationType", notificationDto.getCategory());
+        message.put("notificationType", notificationDto.getCategory().toString());
 
         json.put("data", message);
         json.put("to", device.getToken());

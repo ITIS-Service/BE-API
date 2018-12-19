@@ -15,6 +15,7 @@ import com.itis.service.repository.CourseRepository;
 import com.itis.service.repository.PointRepository;
 import com.itis.service.repository.StudentRepository;
 import com.itis.service.repository.UserCourseRepository;
+import com.itis.service.service.NotificationService;
 import com.itis.service.service.PointService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,18 +36,22 @@ public class PointServiceImpl implements PointService {
 
     private final PointMapper pointMapper;
 
+    private final NotificationService notificationService;
+
     @Autowired
     public PointServiceImpl(
             CourseRepository courseRepository,
             StudentRepository studentRepository,
             PointRepository pointRepository,
             UserCourseRepository userCourseRepository,
-            PointMapper pointMapper) {
+            PointMapper pointMapper,
+            NotificationService notificationService) {
         this.courseRepository = courseRepository;
         this.studentRepository = studentRepository;
         this.pointRepository = pointRepository;
         this.userCourseRepository = userCourseRepository;
         this.pointMapper = pointMapper;
+        this.notificationService = notificationService;
     }
 
     @Transactional
@@ -80,6 +85,10 @@ public class PointServiceImpl implements PointService {
             } else {
                 throw new CreatePointException(student);
             }
+        }
+
+        for (Student student : students) {
+            notificationService.sendPointChanged(student, course, point);
         }
 
         point.getUsers().addAll(students);

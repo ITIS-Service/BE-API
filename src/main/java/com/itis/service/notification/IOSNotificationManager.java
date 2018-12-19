@@ -31,7 +31,7 @@ public class IOSNotificationManager implements NotificationManager {
         String payload = APNS.newPayload()
                 .alertBody(notificationDto.getBody())
                 .alertTitle(notificationDto.getTitle())
-                .category(notificationDto.getCategory())
+                .category(notificationDto.getCategory().toString())
                 .customFields(fields)
                 .sound("default")
                 .build();
