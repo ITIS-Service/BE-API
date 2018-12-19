@@ -28,19 +28,22 @@ public class AndroidNotificationManager implements NotificationManager {
         httpHeaders.set("Authorization", "key=" + FCM_API_KEY);
         httpHeaders.set("Content-Type", "application/json");
 
-        JSONObject message = new JSONObject();
+        JSONObject notification = new JSONObject();
+        JSONObject data = new JSONObject();
         JSONObject json = new JSONObject();
 
-        message.put("title", notificationDto.getTitle());
-        message.put("body", notificationDto.getBody());
-        message.put("notificationType", notificationDto.getCategory().toString());
-
-        json.put("data", message);
-        json.put("to", device.getToken());
+        notification.put("title", notificationDto.getTitle());
+        notification.put("body", notificationDto.getBody());
+        notification.put("notificationType", notificationDto.getCategory().toString());
 
         for (Map.Entry<String, ?> field : fields.entrySet()) {
-            json.put(field.getKey(), field.getValue());
+            data.put(field.getKey(), field.getValue());
         }
+
+        json.put("notification", notification);
+        json.put("data", data);
+        json.put("to", device.getToken());
+
 
         LOG.info("Payload: " + json.toString());
 
