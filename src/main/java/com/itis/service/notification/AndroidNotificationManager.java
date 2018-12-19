@@ -15,7 +15,7 @@ public class AndroidNotificationManager implements NotificationManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(AndroidNotificationManager.class);
 
-    private static final String FCM_API_KEY = "";
+    private static final String FCM_API_KEY = "AAAA5Z2jOug:APA91bGVONFAnv40l5URJZODIIjPsEPBdHQXEzf4pvCYh81K0IPgc1A1rFKWiHykTnnB3L4mg4pHI1A9OSWvMwZMUplPSucQXMRSNMbki913z7LlTWfQuy0f8rg9j21FhFWlTrIJe0xB";
     private static final String FCM_URL = "https://fcm.googleapis.com/fcm/send";
 
     @Override
