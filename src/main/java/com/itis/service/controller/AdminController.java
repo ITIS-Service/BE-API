@@ -5,6 +5,7 @@ import com.itis.service.entity.CourseDetails;
 import com.itis.service.mapper.CourseDetailsMapper;
 import com.itis.service.service.CourseService;
 import com.itis.service.service.TeacherService;
+import com.itis.service.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,15 +18,18 @@ public class AdminController {
 
     private final CourseService courseService;
     private final TeacherService teacherService;
+    private final UserService userService;
 
     private final CourseDetailsMapper courseDetailsMapper;
 
     @Autowired
     public AdminController(CourseService courseService,
                            TeacherService teacherService,
+                           UserService userService,
                            CourseDetailsMapper courseDetailsMapper) {
         this.courseService = courseService;
         this.teacherService = teacherService;
+        this.userService = userService;
         this.courseDetailsMapper = courseDetailsMapper;
     }
 
@@ -47,6 +51,12 @@ public class AdminController {
     public ResponseDto acceptStudents(@PathVariable Long courseID, @RequestBody StudentListDto studentListDto) {
         courseService.updateStudentsStatus(studentListDto, courseID);
         return new ResponseDto("Статусы успешно обновлены", true);
+    }
+
+    @ApiOperation(value = "Create new student")
+    @PostMapping("/students")
+    public ProfileDto createStudent(@RequestBody CreateStudentDto createStudentDto) {
+        return userService.createStudent(createStudentDto);
     }
 
 }

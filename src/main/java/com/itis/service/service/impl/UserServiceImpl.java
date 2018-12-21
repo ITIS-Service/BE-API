@@ -1,22 +1,21 @@
 package com.itis.service.service.impl;
 
-import com.itis.service.dto.ChangePasswordDto;
-import com.itis.service.dto.ProfileDto;
-import com.itis.service.dto.RegisterDto;
+import com.itis.service.dto.*;
 import com.itis.service.entity.Group;
 import com.itis.service.entity.Student;
 import com.itis.service.entity.User;
+import com.itis.service.entity.UserSettings;
 import com.itis.service.entity.enums.UserRole;
-import com.itis.service.exception.AccountException;
-import com.itis.service.exception.InitializeException;
-import com.itis.service.exception.RegistrationException;
-import com.itis.service.exception.ResourceNotFoundException;
+import com.itis.service.exception.*;
 import com.itis.service.mapper.StudentMapper;
+import com.itis.service.mapper.UserSettingsMapper;
 import com.itis.service.repository.GroupRepository;
 import com.itis.service.repository.StudentRepository;
 import com.itis.service.repository.UserRepository;
+import com.itis.service.repository.UserSettingsRepository;
 import com.itis.service.security.JWTProvider;
 import com.itis.service.service.UserService;
+import com.itis.service.validators.StudEmailValidator;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -26,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.*;
@@ -40,24 +40,31 @@ public class UserServiceImpl implements UserService {
     private final GroupRepository groupRepository;
     private final StudentRepository studentRepository;
     private final UserRepository userRepository;
+    private final UserSettingsRepository userSettingsRepository;
+
     private final PasswordEncoder passwordEncoder;
     private final JWTProvider jwtProvider;
 
     private final StudentMapper studentMapper;
+    private final UserSettingsMapper userSettingsMapper;
 
     @Autowired
     public UserServiceImpl(GroupRepository groupRepository,
                            StudentRepository studentRepository,
                            UserRepository userRepository,
+                           UserSettingsRepository userSettingsRepository,
                            PasswordEncoder passwordEncoder,
                            JWTProvider jwtProvider,
-                           StudentMapper studentMapper) {
+                           StudentMapper studentMapper,
+                           UserSettingsMapper userSettingsMapper) {
         this.groupRepository = groupRepository;
         this.studentRepository = studentRepository;
         this.userRepository = userRepository;
+        this.userSettingsRepository = userSettingsRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtProvider = jwtProvider;
         this.studentMapper = studentMapper;
+        this.userSettingsMapper = userSettingsMapper;
     }
 
     public String register(RegisterDto registerDto) {
@@ -99,6 +106,59 @@ public class UserServiceImpl implements UserService {
         } else {
             throw new AccountException();
         }
+    }
+
+    public UserSettingsDto updateUserSettings(UserSettingsDto userSettingsDto, String email) {
+        Student student = studentRepository.findByEmail(email);
+        if (student == null) {
+            throw new ResourceNotFoundException("Пользователь с e-mail" + email + " не найден");
+        }
+
+        UserSettings userSettings = student.getUserSettings();
+
+        if (userSettingsDto.getCourseStatusNotificationEnabled() != null) {
+            userSettings.setCourseStatusNotificationEnabled(userSettingsDto.getCourseStatusNotificationEnabled());
+        }
+
+        if (userSettingsDto.getPointsNotificationEnabled() != null) {
+            userSettings.setPointsNotificationEnabled(userSettingsDto.getPointsNotificationEnabled());
+        }
+
+        userSettingsRepository.saveAndFlush(userSettings);
+
+        return userSettingsMapper.userSettingsDto(userSettings);
+    }
+
+    @Transactional
+    public ProfileDto createStudent(CreateStudentDto createStudentDto) {
+        if (!StudEmailValidator.validate(createStudentDto.getEmail())) {
+            throw new CreateResourceException("Неверный формат e-mail адреса");
+        }
+
+        Student student = studentRepository.findByEmail(createStudentDto.getEmail());
+        if (student != null) {
+            throw new CreateResourceException("Студент с e-mail " + createStudentDto.getEmail() + " уже существует");
+        }
+
+        Group group = groupRepository.findById(createStudentDto.getGroupID()).orElseThrow(
+                () -> new ResourceNotFoundException("Группа с ID " + createStudentDto.getGroupID() + " не найдена")
+        );
+
+        UserSettings userSettings = new UserSettings();
+
+        student = new Student(
+                createStudentDto.getEmail(),
+                null,
+                createStudentDto.getFirstName(),
+                createStudentDto.getLastName(),
+                group,
+                userSettings
+        );
+
+        userSettingsRepository.saveAndFlush(userSettings);
+        studentRepository.saveAndFlush(student);
+
+        return studentMapper.profileDto(student);
     }
 
     public void updateStudentList() {
@@ -145,7 +205,10 @@ public class UserServiceImpl implements UserService {
                             groups.add(group);
                         }
 
-                        Student student = new Student(email, null, name[0], name[1], group);
+                        UserSettings userSettings = new UserSettings();
+                        userSettingsRepository.saveAndFlush(userSettings);
+
+                        Student student = new Student(email, null, name[0], name[1], group, userSettings);
                         students.add(student);
                     }
                 }
@@ -194,10 +257,18 @@ public class UserServiceImpl implements UserService {
         Group group704 = new Group("11-704", 2);
         Group group804 = new Group("11-804", 1);
 
-        Student student504 = new Student("11-504@" + kpfuDomen, passwordEncoder.encode("qwe123"), "Student", "11-504", group504);
-        Student student604 = new Student("11-604@" + kpfuDomen, passwordEncoder.encode("qwe123"), "Student", "11-604", group604);
-        Student student704 = new Student("11-704@" + kpfuDomen, passwordEncoder.encode("qwe123"), "Student", "11-704", group704);
-        Student student804 = new Student("11-804@" + kpfuDomen, passwordEncoder.encode("qwe123"), "Student", "11-804", group804);
+        UserSettings userSettings504 = new UserSettings();
+        UserSettings userSettings604 = new UserSettings();
+        UserSettings userSettings704 = new UserSettings();
+        UserSettings userSettings804 = new UserSettings();
+
+        Student student504 = new Student("11-504@" + kpfuDomen, passwordEncoder.encode("qwe123"), "Student", "11-504", group504, userSettings504);
+        Student student604 = new Student("11-604@" + kpfuDomen, passwordEncoder.encode("qwe123"), "Student", "11-604", group604, userSettings604);
+        Student student704 = new Student("11-704@" + kpfuDomen, passwordEncoder.encode("qwe123"), "Student", "11-704", group704, userSettings704);
+        Student student804 = new Student("11-804@" + kpfuDomen, passwordEncoder.encode("qwe123"), "Student", "11-804", group804, userSettings804);
+
+        userSettingsRepository.saveAll(Arrays.asList(userSettings504, userSettings604, userSettings704, userSettings804));
+        userSettingsRepository.flush();
 
         studentRepository.saveAll(Arrays.asList(student504, student604, student704, student804));
         studentRepository.flush();

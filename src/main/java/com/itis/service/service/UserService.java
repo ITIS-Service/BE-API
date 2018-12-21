@@ -1,8 +1,6 @@
 package com.itis.service.service;
 
-import com.itis.service.dto.ChangePasswordDto;
-import com.itis.service.dto.ProfileDto;
-import com.itis.service.dto.RegisterDto;
+import com.itis.service.dto.*;
 
 public interface UserService {
 
@@ -12,5 +10,7 @@ public interface UserService {
     void createAdmin();
     ProfileDto fetchProfile(String email);
     void changePassword(ChangePasswordDto changePasswordDto, String email);
+    UserSettingsDto updateUserSettings(UserSettingsDto userSettingsDto, String email);
+    ProfileDto createStudent(CreateStudentDto createStudentDto);
 
 }

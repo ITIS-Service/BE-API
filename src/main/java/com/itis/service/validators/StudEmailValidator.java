@@ -8,12 +8,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Component
-public class StudEmailaValidator {
+public class StudEmailValidator {
+
+    public static boolean validate(String email) {
+        Pattern pattern = Pattern.compile("[A-Z0-9a-z._%+-]+@stud.kpfu.ru");
+        Matcher matcher = pattern.matcher(email);
+        return matcher.find();
+    }
 
     public void validate(RegisterDto registerDto, Errors errors) {
-        Pattern pattern = Pattern.compile("[A-Z0-9a-z._%+-]+@stud.kpfu.ru");
-        Matcher matcher = pattern.matcher(registerDto.getEmail());
-        if (!matcher.find()) {
+        if (!validate(registerDto.getEmail())) {
             errors.reject("email");
         }
     }

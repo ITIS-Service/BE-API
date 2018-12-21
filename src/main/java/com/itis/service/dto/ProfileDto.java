@@ -11,5 +11,6 @@ public class ProfileDto {
     private String email;
     private GroupDto group;
     private boolean isPassedQuiz;
+    private UserSettingsDto userSettings;
 
 }
