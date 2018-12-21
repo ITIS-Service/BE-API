@@ -3,7 +3,7 @@ package com.itis.service.controller;
 import com.itis.service.dto.*;
 import com.itis.service.security.SecurityConstants;
 import com.itis.service.service.*;
-import com.itis.service.validators.StudEmailaValidator;
+import com.itis.service.validators.StudEmailValidator;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +28,7 @@ public class UserController {
     private final PointService pointService;
     private final DeviceService deviceService;
 
-    private final StudEmailaValidator studEmailaValidator;
+    private final StudEmailValidator studEmailValidator;
 
     @Autowired
     public UserController(UserService userService,
@@ -36,19 +36,19 @@ public class UserController {
                           CourseService courseService,
                           PointService pointService,
                           DeviceService deviceService,
-                          StudEmailaValidator studEmailaValidator) {
+                          StudEmailValidator studEmailValidator) {
         this.userService = userService;
         this.questionService = questionService;
         this.courseService = courseService;
         this.pointService = pointService;
         this.deviceService = deviceService;
-        this.studEmailaValidator = studEmailaValidator;
+        this.studEmailValidator = studEmailValidator;
     }
 
     @ApiOperation(value = "Register new student with new password", response = ProfileDto.class)
     @PostMapping("/registration")
     public ResponseEntity<Object> register(@Valid @RequestBody RegisterDto registerDto, Errors errors) {
-        studEmailaValidator.validate(registerDto, errors);
+        studEmailValidator.validate(registerDto, errors);
         if (errors.hasErrors()) {
             return ResponseEntity
                     .badRequest()
@@ -115,6 +115,14 @@ public class UserController {
             @ApiIgnore Authentication authentication) {
         userService.changePassword(changePasswordDto, authentication.getName());
         return new ResponseDto("Пароль успешно изменен", true);
+    }
+
+    @ApiOperation(value = "Update user settings")
+    @PostMapping("/profile/settings")
+    public UserSettingsDto updateUserSettings(
+            @RequestBody UserSettingsDto userSettingsDto,
+            @ApiIgnore Authentication authentication) {
+        return userService.updateUserSettings(userSettingsDto, authentication.getName());
     }
 
     @ApiOperation(value = "Register device for push notifications")

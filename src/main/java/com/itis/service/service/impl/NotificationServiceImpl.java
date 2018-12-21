@@ -30,6 +30,10 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     public void sendCourseStatusChanged(Student student, Course course, UserCourseStatus status) {
+        if (!student.getUserSettings().isCourseStatusNotificationEnabled()) {
+            return;
+        }
+
         String title = "Изменение статуса";
         String body = null;
 
@@ -59,6 +63,10 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     public void sendPointChanged(Student student, Course course, Point point) {
+        if (!student.getUserSettings().isPointsNotificationEnabled()) {
+            return;
+        }
+
         String title = "Изменение баллов";
         String body;
 

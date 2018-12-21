@@ -25,6 +25,10 @@ public class Student extends User {
     @JoinColumn(name = "group_id")
     private Group group;
 
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_setting_id")
+    private UserSettings userSettings;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserCourse> userCourses = new ArrayList<>();
 
@@ -49,9 +53,10 @@ public class Student extends User {
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Device> devices = new ArrayList<>();
 
-    public Student(String email, String password, String firstName, String lastName, Group group) {
+    public Student(String email, String password, String firstName, String lastName, Group group, UserSettings userSettings) {
         super(email, password, firstName, lastName, UserRole.STUDENT);
         this.group = group;
+        this.userSettings = userSettings;
     }
 
 }
