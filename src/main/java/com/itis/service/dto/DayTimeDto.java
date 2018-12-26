@@ -15,6 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 public class DayTimeDto {
 
+    private Long id;
     private Day day;
 
     @JsonFormat(pattern = "HH:mm")
