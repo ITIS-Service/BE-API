@@ -10,8 +10,7 @@ import java.util.List;
 public class CourseDetailsDto {
 
     private Long id;
-    private String name;
-    private String description;
+    private CourseDto course;
     private Integer courseNumber;
     private List<DayTimeDto> dayTimes;
     private String place;

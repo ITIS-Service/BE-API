@@ -12,8 +12,6 @@ import java.util.Optional;
 public interface CourseDetailsMapper {
 
     @Mappings({
-            @Mapping(source = "courseDetails.course.name", target = "name"),
-            @Mapping(source = "courseDetails.course.description", target = "description"),
             @Mapping(source = "courseDetails.course.number", target = "courseNumber"),
     })
     CourseDetailsDto courseDetailsToCourseDetailsDto(CourseDetails courseDetails, @Context Student student);
