@@ -17,6 +17,9 @@ public class CourseDetailsDto {
     private TeacherDto teacher;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    private UserPointsDto userPoints;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Boolean signUpOpen;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
