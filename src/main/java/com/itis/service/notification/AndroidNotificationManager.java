@@ -7,8 +7,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
+import java.nio.charset.Charset;
 import java.util.Map;
 
 public class AndroidNotificationManager implements NotificationManager {
@@ -23,6 +25,8 @@ public class AndroidNotificationManager implements NotificationManager {
         LOG.info("Sending an Android push notification...");
 
         RestTemplate restTemplate = new RestTemplate();
+        restTemplate.getMessageConverters().add(0, new StringHttpMessageConverter(Charset.forName("UTF-8")));
+        
         HttpHeaders httpHeaders = new HttpHeaders();
 
         httpHeaders.set("Authorization", "key=" + FCM_API_KEY);
