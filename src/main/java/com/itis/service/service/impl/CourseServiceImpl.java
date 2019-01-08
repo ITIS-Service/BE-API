@@ -11,6 +11,7 @@ import com.itis.service.mapper.CourseMapper;
 import com.itis.service.repository.*;
 import com.itis.service.service.CourseService;
 import com.itis.service.service.NotificationService;
+import com.itis.service.tools.HibernateInitializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -110,11 +111,12 @@ public class CourseServiceImpl implements CourseService {
             throw new ResourceNotFoundException("Студент с почтой " + email + " не найден");
         }
 
-        List<Course> suggestedCourses = student.getSuggestedCourses();
-        List<Course> allCourses = courseRepository.findByNumber(student.getGroup().getCourse());
+        List<Course> suggestedCourses = HibernateInitializer.initializeAndUnproxe(student.getSuggestedCourses());
+        List<Course> allCourses = HibernateInitializer.initializeAndUnproxe(courseRepository.findByNumber(student.getGroup().getCourse()));
         List<Course> userCourses = student.getUserCourses().stream()
                 .map(userCourse -> userCourse.getCourseDetails().getCourse())
                 .collect(Collectors.toList());
+        userCourses = HibernateInitializer.initializeAndUnproxe(userCourses);
 
         allCourses.removeAll(suggestedCourses);
         allCourses.removeAll(userCourses);

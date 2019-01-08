@@ -64,13 +64,15 @@ public class QuestionServiceImpl implements QuestionService {
             );
 
             for (String tag : answer.getTags()) {
-                List<Course> courses = courseRepository.findByTagAndNumber(tag, userCourseNumber).stream().distinct().collect(Collectors.toList());
+                List<Course> courses = courseRepository.findByTagAndNumber(tag, userCourseNumber);
                 suggestedCourses.addAll(courses);
             }
         }
 
+        List<Course> distinctSuggestedCourses = suggestedCourses.stream().distinct().collect(Collectors.toList());
+
         student.setPassedQuiz(true);
-        student.setSuggestedCourses(suggestedCourses);
+        student.setSuggestedCourses(distinctSuggestedCourses);
         studentRepository.saveAndFlush(student);
     }
 
